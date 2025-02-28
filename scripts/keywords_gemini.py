@@ -7,12 +7,15 @@ from dotenv import load_dotenv
 load_dotenv()
 import os
 
-def generate():
-    # Initialize the client
-    client = genai.Client(
-        api_key=os.getenv("GEMINI_API_KEY"),
-    )
+INPUT_FILE = "./data/formatted/fi.json"
+OUTPUT_FILE = "./data/generated/fi.json"
 
+# Initialize the client
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"),
+)
+
+def generate_keywords(input) -> str:
     model = "gemini-2.0-flash"
 
     # Configuration for the generate_content method
@@ -48,8 +51,28 @@ def generate():
         ],
     )
 
+    contents = [
+        types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=str(input))],
+        ),
+    ]
+
+    # Collect the response text from streaming
+    response_text = ""
+    for chunk in client.models.generate_content_stream(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    ):
+        response_text += chunk.text
+
+    return response_text
+
+
+def generate():
     print("Loading data ...")
-    with open("./data/formatted/fi.json", "r", encoding="utf-8") as f:
+    with open(INPUT_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     print(f"Loaded {len(data)} items.")
 
@@ -58,30 +81,15 @@ def generate():
     print("Generating keywords ...")
     # for course in data:
     for i, course in enumerate(random.sample(data, 10)):
-        # Build the content for the prompt
-        contents = [
-            types.Content(
-                role="user",
-                parts=[types.Part.from_text(text=str(course))],
-            ),
-        ]
-
-        # Collect the response text from streaming
-        response_text = ""
-        for chunk in client.models.generate_content_stream(
-            model=model,
-            contents=contents,
-            config=generate_content_config,
-        ):
-            response_text += chunk.text
+        response_text = generate_keywords(course)
 
         # Parse the response (assumed valid JSON with { "keywords": [...] })
         try:
             response_json = json.loads(response_text)
-            course["keywords"] = response_json.get("keywords", [])
+            course["KEYWORDS"] = response_json.get("keywords", [])
         except json.JSONDecodeError:
             # In case the model returns something unexpected
-            course["keywords"] = []
+            course["KEYWORDS"] = []
 
         # Append updated item to the results list
         results.append(course)
@@ -89,10 +97,10 @@ def generate():
 
 
     # Finally, write out the updated items to generated.json
-    with open("./data/generated/fi.json", "w", encoding="utf-8") as f:
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    print("Done! Updated JSON with keywords is saved to './data/generated/fi.json'.")
+    print(f"Done! Updated JSON with keywords is saved to '{OUTPUT_FILE}'.")
 
 if __name__ == "__main__":
     generate()
