@@ -18,11 +18,12 @@ def load_courses(dir_path):
 
 def stem_keywords(courses):
     ps = PorterStemmer()
-    for course in tqdm(courses, total=len(courses)):
+    courses_copy = json.loads(json.dumps(courses))
+    for course in tqdm(courses_copy, total=len(courses_copy)):
         course["KEYWORDS"] = {
             ps.stem(keyword.lower()) for keyword in course["KEYWORDS"]
         }
-    return courses
+    return courses_copy
 
 
 def keyword_intersection(courses):
