@@ -4,3 +4,5 @@
 .env
 
 scripts/__pycache__/
+
+web/backend/__pycache__/
