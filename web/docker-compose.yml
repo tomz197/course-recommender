@@ -1,0 +1,24 @@
+services:
+  backend:
+    build: ./backend/
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./backend:/app
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  frontend:
+    depends_on:
+      - backend
+    build: ./frontend/
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+volumes: 
+  node_modules:
