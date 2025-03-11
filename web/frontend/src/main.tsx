@@ -1,10 +1,32 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import Home from "@/app/page";
+import RecommendationsPage from "@/app/recommendations/page";
+import { QueryProvider } from "@/lib/query-provider";
+import RootLayout from "@/app/layout";
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById("root")!;
+
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootLayout />,
+      children: [
+        { path: "", element: <Home /> },
+        { path: "recommendations", element: <RecommendationsPage /> },
+      ],
+    },
+  ],
+  { basename: "/" },
+);
+
+ReactDOM.createRoot(root).render(
   <StrictMode>
-    <App />
+    <QueryProvider>
+      <RouterProvider router={router} />
+    </QueryProvider>
   </StrictMode>,
-)
+);
