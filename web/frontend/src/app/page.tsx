@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,40 +9,70 @@ import {
 } from "@/components/ui/card";
 import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
-import type { Course } from "@/types";
+import type {
+  CoursePreferences,
+  CourseSearch as CourseSearchType,
+} from "@/types";
 import { useNavigate } from "react-router";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [likedCourses, setLikedCourses] = useState<Course[]>([]);
-  const [dislikedCourses, setDislikedCourses] = useState<Course[]>([]);
+  const [likedCourses, setLikedCourses] = useState<CourseSearchType[]>([]);
+  const [dislikedCourses, setDislikedCourses] = useState<CourseSearchType[]>(
+    [],
+  );
 
-  const handleAddLikedCourse = (course: Course) => {
-    if (!likedCourses.some((c) => c.id === course.id)) {
+  useEffect(() => {
+    const raw = localStorage.getItem("coursePreferences");
+    if (!raw) return;
+
+    const { liked, disliked } = JSON.parse(raw) as CoursePreferences;
+
+    setLikedCourses(
+      liked.map((code) => ({
+        CODE: code,
+        NAME: "Course Name",
+        FACULTY: "Faculty",
+      })),
+    );
+    setDislikedCourses(
+      disliked.map((code) => ({
+        CODE: code,
+        NAME: "Course Name",
+        FACULTY: "Faculty",
+      })),
+    );
+  }, []);
+
+  const handleAddLikedCourse = (course: CourseSearchType) => {
+    if (!likedCourses.some((c) => c.CODE === course.CODE)) {
       setLikedCourses([...likedCourses, course]);
     }
   };
 
-  const handleAddDislikedCourse = (course: Course) => {
-    if (!dislikedCourses.some((c) => c.id === course.id)) {
+  const handleAddDislikedCourse = (course: CourseSearchType) => {
+    if (!dislikedCourses.some((c) => c.CODE === course.CODE)) {
       setDislikedCourses([...dislikedCourses, course]);
     }
   };
 
   const handleRemoveLikedCourse = (courseId: string) => {
-    setLikedCourses(likedCourses.filter((course) => course.id !== courseId));
+    setLikedCourses(likedCourses.filter((course) => course.CODE !== courseId));
   };
 
   const handleRemoveDislikedCourse = (courseId: string) => {
     setDislikedCourses(
-      dislikedCourses.filter((course) => course.id !== courseId),
+      dislikedCourses.filter((course) => course.CODE !== courseId),
     );
   };
 
   const handleGetRecommendations = () => {
-    // Store selected courses in localStorage or state management
-    localStorage.setItem("likedCourses", JSON.stringify(likedCourses));
-    localStorage.setItem("dislikedCourses", JSON.stringify(dislikedCourses));
+    const preferences: CoursePreferences = {
+      liked: likedCourses.map((course) => course.CODE),
+      disliked: dislikedCourses.map((course) => course.CODE),
+    };
+
+    localStorage.setItem("coursePreferences", JSON.stringify(preferences));
     navigate("/recommendations");
   };
 

@@ -10,62 +10,55 @@ import {
 } from "@/components/ui/card";
 import { ThumbsDown, Minus, ThumbsUp, ArrowLeft } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
-import type { Course } from "@/types";
+import type { CoursePreferences } from "@/types";
 import { useNavigate } from "react-router";
 
 export default function RecommendationsPage() {
   const navigate = useNavigate();
-  const [likedCourses, setLikedCourses] = useState<Course[]>([]);
-  const [dislikedCourses, setDislikedCourses] = useState<Course[]>([]);
-  const [currentRecommendation, setCurrentRecommendation] =
-    useState<Course | null>(null);
+  const [likedCourses, setLikedCourses] = useState<string[]>([]);
+  const [dislikedCourses, setDislikedCourses] = useState<string[]>([]);
 
   // Load saved courses from localStorage
   useEffect(() => {
-    const savedLikedCourses = localStorage.getItem("likedCourses");
-    const savedDislikedCourses = localStorage.getItem("dislikedCourses");
+    const raw = localStorage.getItem("coursePreferences");
+    if (!raw) return;
 
-    if (savedLikedCourses) {
-      setLikedCourses(JSON.parse(savedLikedCourses));
-    }
+    const { liked, disliked } = JSON.parse(raw) as CoursePreferences;
 
-    if (savedDislikedCourses) {
-      setDislikedCourses(JSON.parse(savedDislikedCourses));
-    }
+    setLikedCourses(liked);
+    setDislikedCourses(disliked);
   }, []);
 
   // Assuming this hook exists and returns a tanstack-query response
   const {
-    data: recommendations = [],
+    data: recommendation,
     refetch,
     isLoading,
+    isPending,
+    isError,
+    error,
   } = useRecommendCourses({
-    likedCourses,
-    dislikedCourses,
+    liked: likedCourses,
+    disliked: dislikedCourses,
   });
 
-  // Set initial recommendation when data is loaded
-  useEffect(() => {
-    if (recommendations.length > 0 && !currentRecommendation) {
-      setCurrentRecommendation(recommendations[0]);
-    }
-  }, [recommendations, currentRecommendation]);
-
   const handleFeedback = async (feedback: "dislike" | "neutral" | "like") => {
-    // In a real app, you would send this feedback to your backend
-    console.log(`User ${feedback}d course:`, currentRecommendation);
+    if (!recommendation) return;
 
-    // Get next recommendation
-    await refetch();
-
-    // For demo purposes, just pick a random course from recommendations
-    if (recommendations.length > 1) {
-      const filteredRecs = recommendations.filter(
-        (rec) => rec.id !== currentRecommendation?.id,
-      );
-      const randomIndex = Math.floor(Math.random() * filteredRecs.length);
-      setCurrentRecommendation(filteredRecs[randomIndex]);
+    if (feedback === "dislike") {
+      setDislikedCourses([...dislikedCourses, recommendation.CODE]);
+    } else if (feedback === "like") {
+      setLikedCourses([...likedCourses, recommendation.CODE]);
     }
+
+    const preferences: CoursePreferences = {
+      liked: likedCourses,
+      disliked: dislikedCourses,
+    };
+
+    localStorage.setItem("coursePreferences", JSON.stringify(preferences));
+
+    await refetch();
   };
 
   return (
@@ -85,8 +78,16 @@ export default function RecommendationsPage() {
         </p>
       </div>
 
+      {isError ? (
+        <div >
+          <p>Failed to load recommendations. Please try again later.</p>
+          {error && (
+            <p className="text-red-500 text-sm">{error.message}</p>
+          )}
+        </div>
+      ) : null}
       <div className="flex justify-center mb-12">
-        {isLoading ? (
+        {isPending || !recommendation ? (
           <Card className="w-full max-w-2xl">
             <CardContent className="pt-6 flex justify-center">
               <div className="h-40 flex items-center justify-center">
@@ -94,20 +95,19 @@ export default function RecommendationsPage() {
               </div>
             </CardContent>
           </Card>
-        ) : currentRecommendation ? (
+        ) : recommendation ? (
           <Card className="w-full max-w-2xl">
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 <div>
-                  {currentRecommendation.name}
+                  {recommendation.NAME}
                   <span className="block text-sm font-normal text-muted-foreground mt-1">
-                    {currentRecommendation.code} -{" "}
-                    {currentRecommendation.department}
+                    {recommendation.CODE} - {recommendation.FACULTY}
                   </span>
                 </div>
               </CardTitle>
               <CardDescription>
-                {currentRecommendation.description ||
+                {recommendation.DESCRIPTION ||
                   "This course is recommended based on your preferences. No detailed description available."}
               </CardDescription>
             </CardHeader>
@@ -117,6 +117,7 @@ export default function RecommendationsPage() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
+                { !isLoading ? ( <>
               <Button
                 variant="outline"
                 onClick={() => handleFeedback("dislike")}
@@ -140,6 +141,7 @@ export default function RecommendationsPage() {
                 <ThumbsUp className="mr-2 h-4 w-4" />
                 Like
               </Button>
+            </>): null}
             </CardFooter>
           </Card>
         ) : (

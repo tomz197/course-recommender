@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI 
+from fastapi.middleware.cors import CORSMiddleware
 from scripts.embedding_helpers import recommend_based_on_liked_disliked
 from typing import List
 from pydantic import BaseModel
@@ -8,7 +9,11 @@ from scripts.helpers import load_courses
 class Item(BaseModel):
     recommended_courses: List[dict]
 
+#app = FastAPI()
+# init fast api with cors
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
 
 courses, ctoi = load_courses("data/generated")
 all_embeds = np.load(f"data/embeddings/embeds.npy", allow_pickle=True)
