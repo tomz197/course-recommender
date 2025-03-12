@@ -8,7 +8,8 @@ import type {
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
-  console.log("Fetching recommendations..." + JSON.stringify(params));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
   const res = (await fetch(
     import.meta.env.VITE_API_URL + "/recommendations?n=1",
     {
@@ -16,7 +17,10 @@ const getRecommendations = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...params, n: 5 }),
+      body: JSON.stringify({
+        liked: [...params.liked.values()].map((course) => course.CODE),
+        disliked: [...params.disliked.values()].map((course) => course.CODE),
+      }),
     },
   ).then((res) => {
     return res.json();
@@ -31,7 +35,7 @@ export function useRecommendCourses(params: CoursePreferences) {
   return useQuery({
     queryKey: ["recommendations", params.liked, params.disliked],
     queryFn: () => getRecommendations(params),
-    enabled: params.liked.length > 0,
+    enabled: params.liked.size > 0,
     staleTime: 1000 * 60, // 1 minutes
   });
 }

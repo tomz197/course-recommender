@@ -44,6 +44,6 @@ export type Course = {
 export type CourseSearch = Pick<Course, "CODE" | "NAME" | "FACULTY">;
 
 export type CoursePreferences = {
-  liked: CourseSearch["CODE"][];
-  disliked: CourseSearch["CODE"][];
+  liked: Map<CourseSearch["CODE"], CourseSearch>;
+  disliked: Map<CourseSearch["CODE"], CourseSearch>;
 };
