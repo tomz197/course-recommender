@@ -20,3 +20,15 @@ def sort_by_similarity(target, candidates):
     candidates = [(i, c, similarity(target, c)) for i, c in enumerate(candidates)]
     candidates.sort(key=lambda x: x[2], reverse=True)
     return candidates
+
+def courses_codes_to_indices(courses_codes, ctoi):
+    return [ctoi[code] for code in courses_codes]
+
+def recommend_based_on_liked_disliked(liked, disliked, all_embeds, ctoi, n):
+    liked_indices = courses_codes_to_indices(liked, ctoi)
+    disliked_indices = courses_codes_to_indices(disliked, ctoi)
+    all_embeds = np.array(all_embeds)
+    liked_embeds = all_embeds[liked_indices]
+    disliked_embeds = all_embeds[disliked_indices]
+    combined_embed = add_embeddings(liked_embeds, disliked_embeds)
+    return [(i, sim) for i, _, sim in sort_by_similarity(combined_embed, all_embeds)][:n]
