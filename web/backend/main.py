@@ -10,15 +10,9 @@ class Item(BaseModel):
 
 app = FastAPI()
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
 courses, ctoi = load_courses("data/generated")
 all_embeds = np.load(f"data/embeddings/embeds.npy", allow_pickle=True)
 
-=======
->>>>>>> 6ae6a5a5b44f68c8f7da0c90d9c97af4ea698c65
->>>>>>> Stashed changes
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
