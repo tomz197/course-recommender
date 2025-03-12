@@ -1,5 +1,5 @@
 import numpy as np
-from scripts.helpers import load_courses, nice_dict_print
+from scripts.helpers import nice_dict_print
 
 def similarity(vector1, vector2):
     cosine_similarity = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
