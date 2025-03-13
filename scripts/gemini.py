@@ -1,14 +1,12 @@
 import json
 from google import genai
 from google.genai import types
-import random
+import datetime
 
 from dotenv import load_dotenv
 load_dotenv()
 import os
 
-INPUT_FILE = "./data/formatted/fi.json"
-OUTPUT_FILE = "./data/generated/fi.json"
 
 # Initialize the client
 client = genai.Client(
@@ -16,9 +14,42 @@ client = genai.Client(
 )
 
 
-def generate():
+def main():
+   input_files = [
+      #"./data/formatted/cst.json",
+      #"./data/formatted/esf.json",
+      #"./data/formatted/faf.json",
+      #"./data/formatted/ff.json",
+      #"./data/formatted/fi.json",
+      #"./data/formatted/fsps.json",
+      #"./data/formatted/fss.json", 
+      #"./data/formatted/lf.json",
+      "./data/formatted/pdf.json",
+      "./data/formatted/prf.json",
+      "./data/formatted/přf.json",
+   ]
+   output_files= [
+      #"./data/generated/cst.json",
+      #"./data/generated/esf.json",
+      #"./data/generated/faf.json",
+      #"./data/generated/ff.json", 4470/6165
+      #"./data/fi.json",
+      #"./data/generated/fsps.json",
+      #"./data/generated/fss.json", 
+      #"./data/generated/lf.json", 640/2379
+      "./data/generated/pdf.json",
+      "./data/generated/prf.json",
+      "./data/generated/přf.json",
+   ]
+
+   for input_file, output_file in zip(input_files, output_files):
+       print(f"Generating keywords for '{input_file}' ...")
+       generate(input_file, output_file)
+
+
+def generate(input_file, output_file):
     print("Loading data ...")
-    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+    with open(input_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     print(f"Loaded {len(data)} items.")
 
@@ -36,14 +67,20 @@ def generate():
 
         # Append updated item to the results list
         results.append(course)
-        print(f"Processed item {i+1}/{len(data)}")
+
+        # Write files every 10 items
+        if (i+1) % 10 == 0:
+            with open(output_file, "w", encoding="utf-8") as f:
+                json.dump(results, f, indent=2)
+            print(f"Saved progress to '{output_file}'")
+            print(f"Processed items[{datetime.datetime.now()}]: {i+1}/{len(data)}")
 
 
-    # Finally, write out the updated items to generated.json
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    # Finally, write out the updated items to data/generated.json
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    print(f"Done! Updated JSON with keywords is saved to '{OUTPUT_FILE}'.")
+    print(f"Done! Updated JSON with keywords is saved to '{output_file}'.")
 
 def extract_keywords(response_text):
     response_json = json.loads(response_text)
@@ -205,4 +242,4 @@ Rate the course on the following scales (0–10). Base ratings only on the provi
 
 
 if __name__ == "__main__":
-    generate()
+   main()

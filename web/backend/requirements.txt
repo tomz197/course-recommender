@@ -1,1 +1,6 @@
-fastapi[standard]
+fastapi[standard]==0.115.11
+numpy==2.2.3
+
+
+
+

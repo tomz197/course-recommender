@@ -1,9 +1,8 @@
-import os
-import json
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
-from scripts.embedding_helpers import recommend_based_on_liked_disliked
-from typing import Dict, Any, List, Tuple
+from app.recommend import recommend_based_on_liked_disliked
+from app.courses import load_courses
+from typing import List
 from pydantic import BaseModel
 import numpy as np
 
@@ -19,9 +18,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-
-courses, ctoi = load_courses("data/generated")
-all_embeds = np.load(f"data/embeddings/embeds.npy", allow_pickle=True)
+courses, ctoi = load_courses("./assets/courses/")
+all_embeds = np.load(f"./assets/embeds.npy", allow_pickle=True)
 
 @app.post("/recommendations", response_model=Item)
 async def recommendations(liked: List[str], disliked: List[str], n: int) -> Item:
@@ -33,12 +31,3 @@ async def recommendations(liked: List[str], disliked: List[str], n: int) -> Item
 
     return {"recommended_courses": recommended_courses}
 
-def load_courses(dir_path) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
-    files = os.listdir(dir_path)
-    courses = []
-    for file in files:
-        with open(f"{dir_path}/{file}", "r") as f:
-            courses.append(json.load(f))
-    courses = courses[0]
-    ctoi = {course["CODE"]: i for i, course in enumerate(courses)}
-    return courses, ctoi
