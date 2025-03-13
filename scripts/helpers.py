@@ -10,8 +10,7 @@ def load_courses(dir_path):
     courses = []
     for file in files:
         with open(f"{dir_path}/{file}", "r") as f:
-            courses.append(json.load(f))
-    courses = courses[0]
+            courses.extend(json.load(f))
     ctoi = {course["CODE"].strip(): i for i, course in enumerate(courses)}
     return courses, ctoi
 
@@ -47,11 +46,13 @@ def get_only_generated_info(courses):
         for course in courses
     ]
 
+
 def nice_dict_print(d):
     res = ""
     for k, v in d.items():
         res += f" {v} "
     return res
+
 
 def ratings_to_string(ratings):
     res = ""
@@ -88,10 +89,14 @@ def ratings_to_string(ratings):
         res += " "
     return res
 
+
 # Example usage
 if __name__ == "__main__":
     courses, ctoi = load_courses("./data/generated")
-    courses = stem_keywords(courses)
-    intersects = keyword_intersection(courses)
+    
+    print(len(courses))
 
-    print(intersects[ctoi["MB152"], :])
+    # courses = stem_keywords(courses)
+    # intersects = keyword_intersection(courses)
+
+    # print(intersects[ctoi["MB152"], :])
