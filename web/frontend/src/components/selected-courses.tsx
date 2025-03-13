@@ -8,12 +8,14 @@ interface SelectedCoursesProps {
   courses: CourseSearch[];
   onRemove: (courseId: string) => void;
   emptyMessage?: string;
+  wrap?: boolean;
 }
 
 export function SelectedCourses({
   courses,
   onRemove,
   emptyMessage = "No courses selected",
+  wrap = true,
 }: SelectedCoursesProps) {
   if (courses.length === 0) {
     return (
@@ -22,7 +24,7 @@ export function SelectedCourses({
   }
 
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className={`flex ${wrap ? "flex-wrap" : ""} gap-2 mb-2`}>
       {courses.map((course) => (
         <Badge
           key={course.CODE}

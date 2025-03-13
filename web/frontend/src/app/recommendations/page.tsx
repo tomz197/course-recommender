@@ -13,6 +13,7 @@ import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { useNavigate } from "react-router";
 import { storageController } from "@/storage";
 import { CourseSearch, Course } from "@/types";
+import { SelectedCourses } from "@/components/selected-courses";
 
 export default function RecommendationsPage() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function RecommendationsPage() {
     data: recommendation,
     refetch,
     isLoading,
+    isFetching,
     isError,
     error,
   } = useRecommendCourses({
@@ -62,13 +64,13 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
+    <main className="container mx-auto px-4 py-8 md:py-12 gap-8">
       <Button variant="ghost" onClick={() => navigate("/")} className="mb-8">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back to Selection
       </Button>
 
-      <div className="flex flex-col items-center text-center mb-12">
+      <div className="flex flex-col items-center text-center mb-14">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
           Your Course Recommendations
         </h1>
@@ -78,13 +80,42 @@ export default function RecommendationsPage() {
         </p>
       </div>
 
-      <div className="flex justify-center mb-12">
+        <div className="flex flex-col justify-center max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm">Liked: </p>
+          <div className="overflow-x-scroll max-h-">
+          <SelectedCourses
+            courses={Array.from(likedCourses.values())}
+            onRemove={(courseId: string) => {
+              likedCourses.delete(courseId);
+              setLikedCourses(new Map(likedCourses));
+            }}
+            emptyMessage="No liked courses selected yet"
+            wrap={false}
+          />
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-center max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-sm">Disliked: </p>
+          <div className="overflow-x-scroll">
+          <SelectedCourses
+            courses={Array.from(dislikedCourses.values())}
+            onRemove={(courseId: string) => {
+              dislikedCourses.delete(courseId);
+              setDislikedCourses(new Map(dislikedCourses));
+            }}
+            emptyMessage="No disliked courses selected yet"
+          />
+          </div>
+        </div>
+
+      <div className="flex justify-center mt-8">
         {isError ? <ErrorCard error={error} /> : null}
 
         {recommendation ? (
           <CourseCard
             handleFeedback={handleFeedback}
-            isLoading={isLoading}
+            isLoading={isLoading || isFetching}
             recommendation={recommendation}
           />
         ) : null}
@@ -163,15 +194,12 @@ function CourseCard({
             </span>
           </div>
         </CardTitle>
-        <CardDescription>
-          {recommendation.DESCRIPTION ||
-            "This course is recommended based on your preferences. No detailed description available."}
-        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-40 bg-muted rounded-md flex items-center justify-center">
-          <p className="text-muted-foreground">Course content preview</p>
-        </div>
+          <p>
+          {recommendation.DESCRIPTION ||
+            "This course is recommended based on your preferences. No detailed description available."}
+          </p>
       </CardContent>
       <CardFooter className="flex justify-between">
         {!isLoading ? (
@@ -184,6 +212,7 @@ function CourseCard({
               <ThumbsDown className="mr-2 h-4 w-4" />
               Dislike
             </Button>
+            {/*
             <Button
               variant="outline"
               onClick={() => handleFeedback("neutral")}
@@ -192,6 +221,7 @@ function CourseCard({
               <Minus className="mr-2 h-4 w-4" />
               Neutral
             </Button>
+                */}
             <Button
               onClick={() => handleFeedback("like")}
               className="flex-1 ml-2"
