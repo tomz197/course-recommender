@@ -15,31 +15,37 @@ class Ratings:
 
 @dataclass
 class Course:
-    code: str
-    faculty: str
-    name: str
-    language: str
-    semester: str
-    credits: int
-    department: str
-    teachers: str
-    completion: str
-    prerequisites: str
-    fields_of_study: Optional[str]
-    type_of_study: Optional[str]
-    lectures_seminars_homework: str
-    syllabus: str
-    objectives: str
-    text_prerequisits: Optional[str]
-    assessment_methods: str
-    teaching_methods: str
-    teacher_info: Optional[str]
-    learning_outcomes: str
-    literature: str
-    students_enrolled: int
-    students_passed: int
-    average_grade: float
-    followup_courses: Optional[str]
-    keywords: List[str]
-    description: str
-    ratings: Ratings
+    CODE: str
+    FACULTY: str
+    NAME: str
+    LANGUAGE: str
+    SEMESTER: str
+    CREDITS: int
+    DEPARTMENT: str
+    TEACHERS: str
+    COMPLETION: str
+    PREREQUISITES: str
+    FIELDS_OF_STUDY: Optional[str]
+    TYPE_OF_STUDY: Optional[str]
+    LECTURES_SEMINARS_HOMEWORK: str
+    SYLLABUS: str
+    OBJECTIVES: str
+    TEXT_PREREQUISITS: Optional[str]
+    ASSESMENT_METHODS: str
+    TEACHING_METHODS: str
+    TEACHER_INFO: Optional[str]
+    LEARNING_OUTCOMES: str
+    LITERATURE: str
+    STUDENTS_ENROLLED: int
+    STUDENTS_PASSED: int
+    AVERAGE_GRADE: float
+    FOLLOWUP_COURSES: Optional[str]
+    KEYWORDS: List[str]
+    DESCRIPTION: str
+    RATINGS: Ratings 
+
+@dataclass
+class CourseWithId(Course):
+    ID: Optional[int] = None
+    SIMILARITY: float = 0.0
+

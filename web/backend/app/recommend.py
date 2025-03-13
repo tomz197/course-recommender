@@ -1,6 +1,11 @@
+from typing import List, Tuple
 import numpy as np
+import numpy.typing as npt
 
-def similarity(vector1, vector2):
+from app.courses import CourseClient
+from app.types import CourseWithId
+
+def compute_similarity(vector1, vector2):
     cosine_similarity = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
     return cosine_similarity
 
@@ -13,18 +18,38 @@ def add_embeddings(pos_vectors, neg_vectors):
     return np.mean(pos_vectors, axis=0) - np.mean(neg_vectors, axis=0)
 
 def sort_by_similarity(target, candidates):
-    candidates = [(i, c, similarity(target, c)) for i, c in enumerate(candidates)]
+    candidates = [(i, c, compute_similarity(target, c)) for i, c in enumerate(candidates)]
     candidates.sort(key=lambda x: x[2], reverse=True)
     return candidates
 
-def courses_codes_to_indices(courses_codes, ctoi):
-    return [ctoi[code] for code in courses_codes]
+def codes_to_ids(courses_codes: List[str], courseClient: CourseClient) -> List[int]:
+    res = []
+    for code in courses_codes:
+        course = courseClient.get_course_by_code(code)
+        if course is not None:
+            res.append(course.ID)
+    return res
 
-def recommend_based_on_liked_disliked(liked, disliked, all_embeds, ctoi, n):
-    liked_indices = courses_codes_to_indices(liked, ctoi)
-    disliked_indices = courses_codes_to_indices(disliked, ctoi)
-    liked_embeds = all_embeds[liked_indices]
-    disliked_embeds = all_embeds[disliked_indices]
+def recommend_courses(liked: List[str], disliked: List[str], all_embeds: npt.NDArray, courseClient: CourseClient, n: int) -> Tuple[List[CourseWithId], List[float]]:
+    liked_ids = codes_to_ids(liked, courseClient)
+    disliked_ids = codes_to_ids(disliked, courseClient)
+
+    liked_embeds = all_embeds[liked_ids]
+    disliked_embeds = all_embeds[disliked_ids]
+
     combined_embed = add_embeddings(liked_embeds, disliked_embeds)
-    res = [(i, _, sim) for i, _, sim in sort_by_similarity(combined_embed, all_embeds)][:n]
-    return [i for i, _, _ in res], [sim for _, _, sim in res]
+
+    res: Tuple[List[CourseWithId], List[float]] = [], []
+    for idx, _, sim in sort_by_similarity(combined_embed, all_embeds):
+        if len(res[0]) == n:
+            break
+
+        if idx not in liked_ids and idx not in disliked_ids:
+            found = courseClient.get_course_by_id(idx)
+            if found is None:
+                continue
+
+            res[0].append(found)
+            res[1].append(sim)
+
+    return res
