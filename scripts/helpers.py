@@ -154,7 +154,7 @@ def edit_catalogue_for_llm(course):
     # Remove unnecessary fields
     unneccessary_fields = ["SEMESTER", "DEPARTMENT", "FIELDS_OF_STUDY", "LECTURES_SEMINARS_HOMEWORK",
                            "STUDENTS_ENROLLED", "STUDENTS_PASSED", "AVERAGE_GRADE", "FOLLOWUP_COURSES",
-                           "PREREQUISITES"]
+                           "PREREQUISITES", "TEACHERS"]
     
     for field in unneccessary_fields:
         new_course.pop(field)

@@ -1,12 +1,11 @@
 import numpy as np
-from scripts.helpers import nice_dict_print
 
 def similarity(vector1, vector2):
     cosine_similarity = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
     return cosine_similarity
 
-def embed_nice_print(models, course):
-    return models.embed_content(model="text-embedding-004", contents=nice_dict_print(course))
+def embed(models, content):
+    return models.embed_content(model="text-embedding-004", contents=content)
 
 def add_embeddings(pos_vectors, neg_vectors):
     if len(neg_vectors) == 0:
