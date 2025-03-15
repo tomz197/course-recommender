@@ -1,4 +1,5 @@
 import json
+import time
 from google import genai
 from google.genai import types
 import datetime
@@ -19,27 +20,27 @@ def main():
       #"./data/formatted/cst.json",
       #"./data/formatted/esf.json",
       #"./data/formatted/faf.json",
-      #"./data/formatted/ff.json",
+      "./data/formatted/ff.json",
       #"./data/formatted/fi.json",
       #"./data/formatted/fsps.json",
       #"./data/formatted/fss.json", 
-      #"./data/formatted/lf.json",
+      "./data/formatted/lf.json",
       "./data/formatted/pdf.json",
-      "./data/formatted/prf.json",
-      "./data/formatted/přf.json",
+      #"./data/formatted/prf.json",
+      #"./data/formatted/přf.json",
    ]
    output_files= [
       #"./data/generated/cst.json",
       #"./data/generated/esf.json",
       #"./data/generated/faf.json",
-      #"./data/generated/ff.json", 4470/6165
+      "./data/generated/ff.json", #4470/6165
       #"./data/fi.json",
       #"./data/generated/fsps.json",
       #"./data/generated/fss.json", 
-      #"./data/generated/lf.json", 640/2379
-      "./data/generated/pdf.json",
-      "./data/generated/prf.json",
-      "./data/generated/přf.json",
+      "./data/generated/lf.json", #640/2379
+      "./data/generated/pdf.json", #3780/4472
+      #"./data/generated/prf.json",
+      #"./data/generated/přf.json",
    ]
 
    for input_file, output_file in zip(input_files, output_files):
@@ -58,7 +59,15 @@ def generate(input_file, output_file):
     print("Generating keywords ...")
     # for course in data:
     for i, course in enumerate(data):
-        response_text = generate_keywords(course)
+        response_text = None
+        while response_text is None:
+            try:
+                response_text = prompt_gemini(course)
+            except Exception as e: # wait minute and try again
+                print(f"Error: {e}")
+                print(f"Waiting 60 seconds and trying again ...")
+                time.sleep(60)
+
 
         # Extract keywords from the response
         course["KEYWORDS"] = extract_keywords(response_text)
@@ -95,7 +104,7 @@ def extract_ratings(response_text):
     return response_json.get("ratings", {})
 
 
-def generate_keywords(input) -> str:
+def prompt_gemini(input) -> str:
     model = "gemini-2.0-flash"
 
     generate_content_config = types.GenerateContentConfig(

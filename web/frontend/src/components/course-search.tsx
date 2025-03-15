@@ -32,13 +32,9 @@ export function CourseSearch({
   const [searchQuery, setSearchQuery] = React.useState("");
 
   // Assuming this hook exists and returns a tanstack-query response
-  const { data: courses = [], isLoading } = useSearchCourses(searchQuery);
+  const { data: courses = [], isLoading, refetch } = useSearchCourses(searchQuery);
 
-  // Filter out excluded courses
-  const filteredCourses = courses.filter(
-    (course) =>
-      !excludeCourses.some((excluded) => excluded.CODE === course.CODE),
-  );
+  console.log(courses);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,16 +54,19 @@ export function CourseSearch({
           <CommandInput
             placeholder={placeholder}
             value={searchQuery}
-            onValueChange={setSearchQuery}
+            onValueChange={(val: string) => {
+              setSearchQuery(val);
+              void refetch();
+            }}
           />
           <CommandList>
             <CommandEmpty>
-              {isLoading ? "Searching..." : "No courses found."}
+              {isLoading && courses.length == 0 ? "Searching..." : "No courses found."}
             </CommandEmpty>
             <CommandGroup>
-              {filteredCourses.map((course) => (
+              {courses.map((course, i) => (
                 <CommandItem
-                  key={course.CODE}
+                  key={new Date().getTime() + i}
                   value={course.CODE}
                   onSelect={() => {
                     onSelectCourse(course);

@@ -10,13 +10,16 @@ const searchCourses = async (query: string): Promise<CourseSearch[]> => {
   if (!query) return [];
 
   const lowercaseQuery = query.toLowerCase();
-  return allFacultySearch
+  const filtered = allFacultySearch
     .filter(
       (course) =>
         course.CODE.toLowerCase().includes(lowercaseQuery) ||
         course.NAME.toLowerCase().includes(lowercaseQuery),
     )
-    .slice(0, 10);
+  if (filtered.length > 10) {
+    return filtered.slice(0, 10);
+  }
+  return filtered;
 };
 
 export function useSearchCourses(query: string) {

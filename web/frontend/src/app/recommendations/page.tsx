@@ -8,11 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ThumbsDown, Minus, ThumbsUp, ArrowLeft } from "lucide-react";
+import { ThumbsDown, ThumbsUp, ArrowLeft, ExternalLink } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { useNavigate } from "react-router";
 import { storageController } from "@/storage";
-import { CourseSearch, Course } from "@/types";
+import { CourseSearch, Course, fullFacultyName, } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 
 export default function RecommendationsPage() {
@@ -88,6 +88,7 @@ export default function RecommendationsPage() {
             onRemove={(courseId: string) => {
               likedCourses.delete(courseId);
               setLikedCourses(new Map(likedCourses));
+              void refetch();
             }}
             emptyMessage="No liked courses selected yet"
             wrap={false}
@@ -103,6 +104,7 @@ export default function RecommendationsPage() {
             onRemove={(courseId: string) => {
               dislikedCourses.delete(courseId);
               setDislikedCourses(new Map(dislikedCourses));
+              void refetch();
             }}
             emptyMessage="No disliked courses selected yet"
           />
@@ -188,18 +190,26 @@ function CourseCard({
       <CardHeader>
         <CardTitle className="flex justify-between items-start">
           <div>
-            {recommendation.NAME}
+            {recommendation.CODE} {recommendation.NAME}
             <span className="block text-sm font-normal text-muted-foreground mt-1">
-              {recommendation.CODE} - {recommendation.FACULTY}
+              {fullFacultyName(recommendation.FACULTY)}
             </span>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-          <p>
+      <CardContent className="flex flex-col gap-2">
+        <p>
           {recommendation.DESCRIPTION ||
             "This course is recommended based on your preferences. No detailed description available."}
-          </p>
+        </p>
+        <a 
+          href={`https://is.muni.cz/auth/predmet/${recommendation.FACULTY}/${recommendation.CODE}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-blue-500 hover:text-blue-700 hover:underline text-sm flex items-center"
+        >
+          Open in IS MU <ExternalLink className="h-4 w-4 ml-1 " />
+        </a>
       </CardContent>
       <CardFooter className="flex justify-between">
         {!isLoading ? (
