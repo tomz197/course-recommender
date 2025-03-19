@@ -1,16 +1,15 @@
-FROM node:22-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json .
 
 RUN npm install --force
 
-RUN npm install -g vite
+RUN npm install --global vite
 
 COPY . .
 
 EXPOSE 5173
 
-# Command to run the application
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev", "--", "--host=0.0.0.0", "--port=5173"]
