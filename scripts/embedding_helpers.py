@@ -8,12 +8,8 @@ def embed(models, content):
     return models.embed_content(model="text-embedding-004", contents=content)
 
 def add_embeddings(pos_vectors, neg_vectors):
-    if len(neg_vectors) == 0:
-        return np.mean(pos_vectors, axis=0)
-    if len(pos_vectors) == 0:
-        return -np.mean(neg_vectors, axis=0)
-    # TODO: do we want to weight positive and negative vectors the same irrespective of the number of vectors?
-    return np.mean(pos_vectors, axis=0) - np.mean(neg_vectors, axis=0)
+    all_vectors = np.concatenate([pos_vectors, -neg_vectors], axis=0)
+    return np.mean(all_vectors, axis=0)
 
 def sort_by_similarity(target, candidates):
     candidates = [(i, c, similarity(target, c)) for i, c in enumerate(candidates)]
