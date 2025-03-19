@@ -8,10 +8,17 @@ from nltk.stem import PorterStemmer
 
 
 def load_courses(dir_path):
+    # If dir_path is a file path
+    if os.path.isfile(dir_path):
+        with open(dir_path, "r") as f:
+            courses = json.load(f)
+        ctoi = {course["CODE"].strip(): i for i, course in enumerate(courses)}
+        return courses, ctoi
+    
     files = os.listdir(dir_path)
     courses = []
     for file in files:
-        with open(f"{dir_path}/{file}", "r") as f:
+        with open(f"{dir_path}/{file}", "r", encoding='utf-8') as f:
             courses.extend(json.load(f))
     ctoi = {course["CODE"].strip(): i for i, course in enumerate(courses)}
     return courses, ctoi
@@ -154,10 +161,14 @@ def edit_catalogue_for_llm(course):
     # Remove unnecessary fields
     unneccessary_fields = ["SEMESTER", "DEPARTMENT", "FIELDS_OF_STUDY", "LECTURES_SEMINARS_HOMEWORK",
                            "STUDENTS_ENROLLED", "STUDENTS_PASSED", "AVERAGE_GRADE", "FOLLOWUP_COURSES",
-                           "PREREQUISITES", "TEACHERS"]
+                           "PREREQUISITES", "TEACHERS", "CODE", "LANGUAGE", "CREDITS", "COMPLETION",
+                           "TYPE_OF_STUDY", "TEXT_PREREQUISITS", "LITERATURE", "SUCCESS_RATE",
+                           "ASSESMENT_METHODS", "TIME_PER_WEEK", "TEACHING_METHODS", "FACULTY",
+                           "TEACHER_INFO"]
     
     for field in unneccessary_fields:
-        new_course.pop(field)
+        if field in new_course:
+            new_course.pop(field)
 
     # Remove empty fields
     for key in list(new_course.keys()):
