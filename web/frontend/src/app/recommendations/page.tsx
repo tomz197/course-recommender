@@ -203,7 +203,7 @@ function CourseCard({
             "This course is recommended based on your preferences. No detailed description available."}
         </p>
         <a
-          href={`https://is.muni.cz/predmet/${recommendation.FACULTY}/${recommendation.CODE}`}
+          href={`https://is.muni.cz/predmet/${recommendation.FACULTY === "P\u0159F" ? "sci" : recommendation.FACULTY}/${recommendation.CODE}`}
           target="_blank"
           rel="noreferrer"
           className="text-blue-500 hover:text-blue-700 hover:underline text-sm flex items-center"

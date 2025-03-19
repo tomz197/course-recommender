@@ -31,7 +31,8 @@ def recommend_courses(liked: List[str], disliked: List[str], all_embeds: npt.NDA
     disliked_ids = codes_to_ids(disliked, courseClient)
 
     liked_embeds = all_embeds[liked_ids]
-    disliked_embeds = all_embeds[disliked_ids]
+    #disliked_embeds = all_embeds[disliked_ids]
+    disliked_embeds = [] # TODO: implement this
 
     combined_embed = add_embeddings(liked_embeds, disliked_embeds)
 
@@ -40,10 +41,11 @@ def recommend_courses(liked: List[str], disliked: List[str], all_embeds: npt.NDA
         if len(res[0]) == n:
             break
 
-        if idx not in liked_ids and idx not in disliked_ids:
-            found = courseClient.get_course_by_id(idx)
-            if found is None:
-                continue
+        found = courseClient.get_course_by_id(idx)
+        if found is None:
+            continue
+
+        if found.CODE not in liked and found.CODE not in disliked:
 
             res[0].append(found)
             res[1].append(sim)

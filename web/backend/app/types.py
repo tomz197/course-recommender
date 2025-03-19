@@ -3,15 +3,15 @@ from typing import List, Optional
 
 @dataclass
 class Ratings:
-    theoretical_vs_practical: int
-    usefulness: int
-    interest: int
-    stem_vs_humanities: int
-    abstract_vs_specific: int
-    difficulty: int
-    multidisciplinary: int
-    project_based: int
-    creative: int
+    theoretical_vs_practical: str
+    usefulness: str
+    interest: str
+    stem_vs_humanities: str
+    abstract_vs_specific: str
+    difficulty: str
+    multidisciplinary: str
+    project_based: str
+    creative: str
 
 @dataclass
 class Course:
@@ -20,7 +20,7 @@ class Course:
     NAME: str
     LANGUAGE: str
     SEMESTER: str
-    CREDITS: int
+    CREDITS: str
     DEPARTMENT: str
     TEACHERS: str
     COMPLETION: str
@@ -36,9 +36,9 @@ class Course:
     TEACHER_INFO: Optional[str]
     LEARNING_OUTCOMES: str
     LITERATURE: str
-    STUDENTS_ENROLLED: int
-    STUDENTS_PASSED: int
-    AVERAGE_GRADE: float
+    STUDENTS_ENROLLED: str
+    STUDENTS_PASSED: str
+    AVERAGE_GRADE: str
     FOLLOWUP_COURSES: Optional[str]
     KEYWORDS: List[str]
     DESCRIPTION: str
@@ -46,6 +46,6 @@ class Course:
 
 @dataclass
 class CourseWithId(Course):
-    ID: Optional[int] = None
+    ID: Optional[int] = 0
     SIMILARITY: float = 0.0
 

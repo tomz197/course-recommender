@@ -31,16 +31,38 @@ class CourseClient:
 
     def _load_courses(self) -> None:
         """Loads all courses from JSON files in the data directory into a dictionary keyed by 'CODE'."""
-        files: List[str] = os.listdir(self.data_dir)
+        #files: List[str] = os.listdir(self.data_dir)
+        files: List[str] = [
+            "cst.json",
+            "esf.json",
+            "faf.json",
+            "ff.json",
+            "fi.json",
+            "fsps.json",
+            "fss.json",
+            "lf.json",
+            "pdf.json",
+            "prf.json",
+            "přf.json",
+        ]
+        idx: int = 0
         for filename in files:
             if not filename.lower().endswith(".json"):
                 continue
 
             with open(os.path.join(self.data_dir, filename), "r", encoding="utf-8") as f:
                 data: List[dict] = json.load(f) 
-                for idx, c in enumerate(data):
-                    course = CourseWithId(**c)
+                for c in data:
+                    try:
+                        course = CourseWithId(**c)
+                    except TypeError as e:
+                        print(f"Error loading course from file {filename} at index {idx}: {e}")
+                        print(f"Course data: {c}")
+                        raise
+
                     course.ID = idx
+                    idx += 1
+
                     course_code = course.CODE
                     self.coursesCode[course_code] = course
                     self.courseId[idx] = course
