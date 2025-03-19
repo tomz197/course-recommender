@@ -24,7 +24,12 @@ function setCoursePreferences(preferences: CoursePreferences) {
   localStorage.setItem("coursePreferences", JSON.stringify(formatted));
 }
 
+function resetCoursePreferences() {
+  localStorage.removeItem("coursePreferences");
+}
+
 export const storageController = {
   getCoursePreferences,
   setCoursePreferences,
+  resetCoursePreferences,
 };

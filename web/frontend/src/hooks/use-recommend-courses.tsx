@@ -8,8 +8,6 @@ import type {
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   const res = (await fetch(
     import.meta.env.VITE_API_URL + "/recommendations?n=1",
     {

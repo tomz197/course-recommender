@@ -1,92 +1,130 @@
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useSearchCourses } from "@/hooks/use-search-courses";
-import type { CourseSearch } from "@/types";
+"use client"
+
+import * as React from "react"
+import { useSearchCourses } from "@/hooks/use-search-courses"
+import type { CourseSearch } from "@/types"
+import { Loader2 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface CourseSearchProps {
-  onSelectCourse: (course: CourseSearch) => void;
-  placeholder?: string;
-  excludeCourses?: CourseSearch[];
+  onSelectCourse: (course: CourseSearch) => void
+  placeholder?: string
+  excludeCourses?: CourseSearch[]
 }
+
+const loadCoursesNumber = 100
 
 export function CourseSearch({
   onSelectCourse,
   placeholder = "Search courses...",
   excludeCourses = [],
 }: CourseSearchProps) {
-  const [open, setOpen] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [open, setOpen] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const inputRef = React.useRef<HTMLInputElement>(null)
+  const dropdownRef = React.useRef<HTMLDivElement>(null)
 
-  // Assuming this hook exists and returns a tanstack-query response
-  const { data: courses = [], isLoading, refetch } = useSearchCourses(searchQuery);
+  const { data: courses = [], isLoading } = useSearchCourses(searchQuery, loadCoursesNumber)
 
-  console.log(courses);
+  // Filter out excluded courses
+  const filteredCourses = React.useMemo(() => {
+    if (!courses.length) return []
+
+    return courses.filter((course) => !excludeCourses.some((excluded) => excluded.CODE === course.CODE))
+  }, [courses, excludeCourses])
+
+  // Handle click outside to close dropdown
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        inputRef.current &&
+        dropdownRef.current &&
+        !inputRef.current.contains(event.target as Node) &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
+  // Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    if (value.length > 0) {
+      setOpen(true)
+    } else {
+      setOpen(false)
+    }
+  }
+
+  // Handle course selection
+  const handleSelectCourse = (course: CourseSearch) => {
+    onSelectCourse(course)
+    setSearchQuery("")
+    setOpen(false)
+  }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
+    <div className="relative w-full">
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchQuery}
+          onChange={handleInputChange}
+          onFocus={() => searchQuery.length > 0 && setOpen(true)}
+          placeholder={placeholder}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        />
+      </div>
+
+      {open && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-10 mt-1 w-full rounded-md border border-input bg-background shadow-md"
         >
-          {placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput
-            placeholder={placeholder}
-            value={searchQuery}
-            onValueChange={(val: string) => {
-              setSearchQuery(val);
-              void refetch();
-            }}
-          />
-          <CommandList>
-            <CommandEmpty>
-              {isLoading && courses.length == 0 ? "Searching..." : "No courses found."}
-            </CommandEmpty>
-            <CommandGroup>
-              {courses.map((course, i) => (
-                <CommandItem
-                  key={new Date().getTime() + i}
-                  value={course.CODE}
-                  onSelect={() => {
-                    onSelectCourse(course);
-                    setOpen(false);
-                    setSearchQuery("");
-                  }}
+          {isLoading ? (
+            <div className="flex items-center justify-center p-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="ml-2 text-sm text-muted-foreground">Searching courses...</span>
+            </div>
+          ) : filteredCourses.length > 0 ? (
+            <ul className="max-h-60 overflow-auto py-1">
+              {filteredCourses.map((course) => (
+                <li
+                  key={course.CODE}
+                  onClick={() => handleSelectCourse(course)}
+                  className={cn(
+                    "px-3 py-2 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                    "transition-colors duration-150",
+                  )}
                 >
-                  <Check className="mr-2 h-4 w-4 opacity-0" />
-                  <div className="flex flex-col">
-                    <span>{course.NAME}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {course.CODE} - {course.NAME}
-                    </span>
-                  </div>
-                </CommandItem>
+                  <div className="font-medium">{course.CODE} - {course.FACULTY}</div>
+                  {course.NAME && (
+                    <div className="text-xs text-muted-foreground truncate">{course.NAME}</div>
+                  )}
+                </li>
               ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
+            {filteredCourses.length === loadCoursesNumber ? (
+              <li className="px-3 py-2 text-sm text-center text-muted-foreground">
+                Showing first {loadCoursesNumber} results. Try a more specific search term.
+              </li>
+            ) : null}
+            </ul>
+          ) : searchQuery.length > 0 ? (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              No courses found. Try a different search term.
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  )
 }
+

@@ -4,28 +4,35 @@ import { useQuery } from "@tanstack/react-query";
 import type { CourseSearch } from "@/types";
 import { allFacultySearch } from "@/lib/all_code_name_faculty";
 
-// Simulated API call
-const searchCourses = async (query: string): Promise<CourseSearch[]> => {
-  // Simulate network delay
+const searchCourses = async (
+  query: string,
+  limit: number,
+): Promise<CourseSearch[]> => {
   if (!query) return [];
 
   const lowercaseQuery = query.toLowerCase();
-  const filtered = allFacultySearch
-    .filter(
-      (course) =>
-        course.CODE.toLowerCase().includes(lowercaseQuery) ||
-        course.NAME.toLowerCase().includes(lowercaseQuery),
-    )
-  if (filtered.length > 10) {
-    return filtered.slice(0, 10);
+  let filtered = allFacultySearch.filter((course) =>
+    course.CODE.toLowerCase().includes(lowercaseQuery),
+  );
+  if (filtered.length >= limit) {
+    return filtered.slice(0, limit);
+  }
+
+  filtered = filtered.concat(
+    allFacultySearch.filter((course) =>
+      course.NAME.toLowerCase().includes(lowercaseQuery),
+    ),
+  );
+  if (filtered.length >= limit) {
+    return filtered.slice(0, limit);
   }
   return filtered;
 };
 
-export function useSearchCourses(query: string) {
+export function useSearchCourses(query: string, limit = 100) {
   return useQuery({
     queryKey: ["courses", query],
-    queryFn: () => searchCourses(query),
+    queryFn: () => searchCourses(query, limit),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

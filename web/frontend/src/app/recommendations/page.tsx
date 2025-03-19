@@ -12,7 +12,7 @@ import { ThumbsDown, ThumbsUp, ArrowLeft, ExternalLink } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { useNavigate } from "react-router";
 import { storageController } from "@/storage";
-import { CourseSearch, Course, fullFacultyName, } from "@/types";
+import { CourseSearch, Course, fullFacultyName } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 
 export default function RecommendationsPage() {
@@ -80,9 +80,9 @@ export default function RecommendationsPage() {
         </p>
       </div>
 
-        <div className="flex flex-col justify-center max-w-2xl mx-auto">
-          <p className="text-muted-foreground text-sm">Liked: </p>
-          <div className="overflow-x-scroll max-h-">
+      <div className="flex flex-col justify-center max-w-2xl mx-auto">
+        <p className="text-muted-foreground text-sm">Liked: </p>
+        <div className="overflow-x-scroll max-h-">
           <SelectedCourses
             courses={Array.from(likedCourses.values())}
             onRemove={(courseId: string) => {
@@ -93,12 +93,12 @@ export default function RecommendationsPage() {
             emptyMessage="No liked courses selected yet"
             wrap={false}
           />
-          </div>
         </div>
+      </div>
 
-        <div className="flex flex-col justify-center max-w-2xl mx-auto">
-          <p className="text-muted-foreground text-sm">Disliked: </p>
-          <div className="overflow-x-scroll">
+      <div className="flex flex-col justify-center max-w-2xl mx-auto">
+        <p className="text-muted-foreground text-sm">Disliked: </p>
+        <div className="overflow-x-scroll">
           <SelectedCourses
             courses={Array.from(dislikedCourses.values())}
             onRemove={(courseId: string) => {
@@ -108,8 +108,8 @@ export default function RecommendationsPage() {
             }}
             emptyMessage="No disliked courses selected yet"
           />
-          </div>
         </div>
+      </div>
 
       <div className="flex justify-center mt-8">
         {isError ? <ErrorCard error={error} /> : null}
@@ -202,8 +202,8 @@ function CourseCard({
           {recommendation.DESCRIPTION ||
             "This course is recommended based on your preferences. No detailed description available."}
         </p>
-        <a 
-          href={`https://is.muni.cz/auth/predmet/${recommendation.FACULTY}/${recommendation.CODE}`}
+        <a
+          href={`https://is.muni.cz/predmet/${recommendation.FACULTY}/${recommendation.CODE}`}
           target="_blank"
           rel="noreferrer"
           className="text-blue-500 hover:text-blue-700 hover:underline text-sm flex items-center"
