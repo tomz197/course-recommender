@@ -1,0 +1,49 @@
+<!DOCTYPE x [
+<!ENTITY podzim "podzim 2024">
+<!ENTITY jaro "jaro 2025">
+]>
+
+<TELO>
+<FAKULTA>1441</FAKULTA>
+<OBDOBI>&podzim;,&jaro;</OBDOBI>
+<PREDM_PAR VYPSANE="ANO"/>
+
+<TFORMA>
+    { <BR/>
+    "CODE": """ <F_PREDM_KOD/> """,  <BR/>
+    "FACULTY": """ <F_PREDM_FAKULTA/> """,  <BR/>
+    "NAME": """ <F_PREDM_NAZEV_ANGL/> """,  <BR/>
+    "LANGUAGE": """ <F_PREDM_VYUC_JAZYK TYP="0"/> """,  <BR/>
+    "SEMESTER": """ <F_PREDM_OBDOBI TYP="typ"/> """,  <BR/>
+    "CREDITS": """ <F_PREDM_KREDITY FORMAT="X"/> """,  <BR/>
+    "DEPARTMENT": """ <F_PREDM_DODAVATELSKE_PRACOVISTE/> """,  <BR/>
+    "TEACHERS": """ <F_PREDM_UCITELE  F_JMENA="prijmeni_init"/> """,  <BR/>
+    "COMPLETION": """ <F_PREDM_UKONCENI/> """,  <BR/>
+    "PREREQUISITES": """ <F_PREDM_PREDPOKLADY FORMAT="předp. X"/> """,  <BR/>
+    "FIELDS_OF_STUDY": """ <F_PREDM_OBORY/> """,  <BR/>
+    "TYPE_OF_STUDY": """ <F_PREDM_TYP_STUDIA/> """,  <BR/>
+    "LECTURES_SEMINARS_HOMEWORK": """ <F_PREDM_ROZSAHY FORMAT="X/Y/Z"/> """,  <BR/>
+    "SYLLABUS": """ <F_PREDM_OSNOVA_ANGL FORMAT="X"/> """,  <BR/>
+    "OBJECTIVES": """ <F_PREDM_CILEPREDMETU_ANGL FORMAT="X"/> """,  <BR/>
+    "TEXT_PREREQUISITS": """ <F_PREDM_TEXTPREDPOKLADY_ANGL FORMAT=""/> """,  <BR/>
+    "ASSESMENT_METHODS": """ <F_PREDM_METODYHODNOCENI_ANGL FORMAT=""/> """,  <BR/>
+    "TEACHING_METHODS": """ <F_PREDM_VYUKOVEMETODY_ANGL FORMAT=""/> """,  <BR/>
+    "TEACHER_INFO": """ <F_PREDM_INFOUCITELE FORMAT=""/> """,  <BR/>
+    "LEARNING_OUTCOMES": """ <F_PREDM_VYSTUPYZUCENI_ANGL FORMAT=""/> """,  <BR/>
+    "LITERATURE": """ <F_PREDM_SYLLIT/> """,  <BR/>
+    "STUDENTS_ENROLLED": """ <F_PREDM_POCET_ZAPS/> """,  <BR/>
+    "STUDENTS_PASSED": """ <F_PREDM_POCET_USP/> """,  <BR/>
+    "AVERAGE_GRADE": """ <F_PREDM_PRUMER/> """,  <BR/>
+    "FOLLOWUP_COURSES": """ <F_PREDM_NAVAZUJICI/> """,  <BR/>
+    }, <BR/>
+</TFORMA>
+
+[
+<OL>
+<DATA_PREDM MAX="10000000">
+	<PREDM_KOD KOD="%"/>
+</DATA_PREDM>
+</OL>
+]
+
+</TELO>

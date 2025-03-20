@@ -2,33 +2,34 @@
 
 Recommendation system for MUNI courses.
 
-## Prerequisites
+Checkout `./notebooks/visualize_embeddings.ipynb` for a cool visualization.
 
-## Setup
+## Structure
 
-## Usage
+- `/notebooks` - contains Jupyter notebooks with data analysis and model training
+- `/notebooks/data` - contains data used in the notebooks
+- `/notebooks/scripts` - contains scripts used in the notebooks
 
-## Progresslog
+- `/web` - contains the web application
+- `/web/frontend` - contains the frontend of the web application
+- `/web/backend` - contains the backend of the web application
 
-### Scraping data
+## Setup (web application)
 
-Scraped with official tool [Prezentátor](https://is.muni.cz/auth/prezentator/)
-with query(can be found in `data/prezentator-query.txt`).
-Data was saved in `data/raw` directory.
+### Requirements
 
+- Docker
 
-### Data cleaning
+### Running the web application
 
-Data was cleaned with [jq](https://stedolan.github.io/jq/) tool (used query can be found in `data/jq-query.txt`).
-Cleaned data was saved in `data/cleaned` directory.
+Go to the `/web` directory and run the following commands:
 
-### Scraping again
+```
+docker-compose up --build
+```
 
-Sraping again with improved query (can be found in `data/prezentator-query2.txt`).
-Data was saved in `data/formatted` directory.
+The web application should be running on `http://localhost:5173`.
 
-### Extracting data
+## Setup (notebooks)
 
-Data extraction was done with script `data/gemini.py` via gemini API.
-Output was saved in `data/generated` directory.
-
+There isn't one, GO WITH THE FLOW!
