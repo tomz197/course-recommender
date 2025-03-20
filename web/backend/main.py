@@ -36,3 +36,6 @@ async def recommendations(liked: List[str], disliked: List[str], n: int, model: 
     elif model == "keywords":
         return RecommendationResponse(recommended_courses=recommend_courses_keywords(liked, disliked, courseClient, n))
 
+@app.get("/models", response_model=List[str])
+async def models() -> List[str]:
+    return ["embeddings_v1", "keywords"]
