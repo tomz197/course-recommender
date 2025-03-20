@@ -1,6 +1,6 @@
 import numpy as np
 
-def similarity(vector1, vector2):
+def compute_similarity(vector1, vector2):
     cosine_similarity = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
     return cosine_similarity
 
@@ -32,14 +32,14 @@ def recommend_based_on_liked_disliked(liked, disliked, all_embeds, ctoi, n, algo
 
 def score_with_one_interest_embed(liked_embeds, disliked_embeds, candidate_embed):
     combined_embed = combine_pos_neg_embeds(liked_embeds, disliked_embeds)
-    return similarity(combined_embed, candidate_embed)
+    return compute_similarity(combined_embed, candidate_embed)
 
 def score_by_adding_scores(liked_embeds, disliked_embeds, candidate_embed):
     score = 0
     for liked_embed in liked_embeds:
-        score += similarity(liked_embed, candidate_embed) ** 2
+        score += compute_similarity(liked_embed, candidate_embed) ** 2
     
     for disliked_embed in disliked_embeds:
-        score -= 0.5 * similarity(disliked_embed, candidate_embed) ** 2
+        score -= 0.5 * compute_similarity(disliked_embed, candidate_embed) ** 2
 
     return score

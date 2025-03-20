@@ -9,12 +9,29 @@ def compute_similarity(vector1, vector2):
     cosine_similarity = np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
     return cosine_similarity
 
-def add_embeddings(pos_vectors, neg_vectors):
+def combine_pos_neg_embeds(pos_vectors, neg_vectors):
     total = len(pos_vectors) + len(neg_vectors)
     return (np.sum(pos_vectors, axis=0) - np.sum(neg_vectors, axis=0)) / total
 
-def sort_by_similarity(target, candidates):
-    candidates = [(i, c, compute_similarity(target, c)) for i, c in enumerate(candidates)]
+def score_with_one_interest_embed(liked_embeds, disliked_embeds, candidate_embed):
+    combined_embed = combine_pos_neg_embeds(liked_embeds, disliked_embeds)
+    return compute_similarity(combined_embed, candidate_embed)
+
+def score_by_adding_scores(liked_embeds, disliked_embeds, candidate_embed):
+    score = 0
+    for liked_embed in liked_embeds:
+        score += compute_similarity(liked_embed, candidate_embed) ** 2
+    
+    for disliked_embed in disliked_embeds:
+        score -= 0.5 * compute_similarity(disliked_embed, candidate_embed) ** 2
+
+    return score
+
+def sort_by_similarity(liked_embeds, disliked_embeds, candidate_embeds, algorithm):
+    if algorithm == "new":
+        candidates = [(i, c, score_by_adding_scores(liked_embeds, disliked_embeds, c)) for i, c in enumerate(candidate_embeds)]
+    else:
+        candidates = [(i, c, score_with_one_interest_embed(liked_embeds, disliked_embeds, c)) for i, c in enumerate(candidate_embeds)]
     candidates.sort(key=lambda x: x[2], reverse=True)
     return candidates
 
@@ -25,10 +42,8 @@ def recommend_courses(liked: List[str], disliked: List[str], all_embeds: npt.NDA
     liked_embeds = all_embeds[liked_ids]
     disliked_embeds = all_embeds[disliked_ids]
 
-    combined_embed = add_embeddings(liked_embeds, disliked_embeds)
-
     res: Tuple[List[CourseWithId], List[float]] = [], []
-    for idx, _, sim in sort_by_similarity(combined_embed, all_embeds):
+    for idx, _, sim in sort_by_similarity(liked_embeds, disliked_embeds, all_embeds, "new"):
         if len(res[0]) == n:
             break
 
