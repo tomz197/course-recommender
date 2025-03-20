@@ -10,7 +10,7 @@ def compute_similarity(vector1, vector2):
     return cosine_similarity
 
 def add_embeddings(pos_vectors, neg_vectors):
-    all_vectors = np.concatenate([pos_vectors, -neg_vectors], axis=0)
+    all_vectors = np.concatenate([pos_vectors, neg_vectors], axis=0)
     return np.mean(all_vectors, axis=0)
 
 def sort_by_similarity(target, candidates):
@@ -31,8 +31,7 @@ def recommend_courses(liked: List[str], disliked: List[str], all_embeds: npt.NDA
     disliked_ids = codes_to_ids(disliked, courseClient)
 
     liked_embeds = all_embeds[liked_ids]
-    #disliked_embeds = all_embeds[disliked_ids]
-    disliked_embeds = [] # TODO: implement this
+    disliked_embeds = all_embeds[disliked_ids]
 
     combined_embed = add_embeddings(liked_embeds, disliked_embeds)
 
