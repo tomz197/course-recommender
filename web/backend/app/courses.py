@@ -61,11 +61,11 @@ class CourseClient:
                         raise
 
                     course.ID = idx
-                    idx += 1
 
                     course_code = course.CODE
                     self.coursesCode[course_code] = course
                     self.courseId[idx] = course
+                    idx += 1
 
     def get_course_by_code(self, code: str) -> Optional[CourseWithId]:
         """
@@ -84,6 +84,14 @@ class CourseClient:
         :return: The course dictionary or None if not found.
         """
         return self.courseId.get(course_id)
+    
+    def get_course_ids_by_codes(self, courses_codes: List[str]) -> List[int]:
+        res = []
+        for code in courses_codes:
+            course = self.get_course_by_code(code)
+            if course is not None:
+                res.append(course.ID)
+        return res
 
     def all_courses(self) -> List[CourseWithId]:
         """

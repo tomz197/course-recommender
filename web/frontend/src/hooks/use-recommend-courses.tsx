@@ -9,6 +9,7 @@ const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
   const res = (await fetch(
+    // "http://127.0.0.1:8000/recommendations?n=1",
     import.meta.env.VITE_API_URL + "/recommendations?n=1",
     {
       method: "POST",

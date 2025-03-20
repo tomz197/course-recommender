@@ -6,7 +6,8 @@ from typing import List
 import numpy.typing as npt
 import numpy as np
 
-from app.recommend import recommend_courses
+from app.recommend_embeddings import recommend_courses
+from app.recommend_keywords import recommend_courses_keywords
 from app.courses import CourseClient
 from app.types import CourseWithId
 
@@ -28,7 +29,10 @@ courseClient = CourseClient("./assets/courses/")
 all_embeds: npt.NDArray = np.load(f"./assets/embeds_all.npy", allow_pickle=True)
 
 @app.post("/recommendations", response_model=RecommendationResponse)
-async def recommendations(liked: List[str], disliked: List[str], n: int) -> RecommendationResponse:
-    recommended_courses, _ = recommend_courses(liked, disliked, all_embeds, courseClient, n)
-    return RecommendationResponse(recommended_courses=recommended_courses)
+async def recommendations(liked: List[str], disliked: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
+    if model == "embeddings_v1":
+        recommended_courses, _ = recommend_courses(liked, disliked, all_embeds, courseClient, n)
+        return RecommendationResponse(recommended_courses=recommended_courses)
+    elif model == "keywords":
+        return RecommendationResponse(recommended_courses=recommend_courses_keywords(liked, disliked, courseClient, n))
 
