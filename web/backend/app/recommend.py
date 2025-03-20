@@ -10,8 +10,8 @@ def compute_similarity(vector1, vector2):
     return cosine_similarity
 
 def add_embeddings(pos_vectors, neg_vectors):
-    all_vectors = np.concatenate([pos_vectors, neg_vectors], axis=0)
-    return np.mean(all_vectors, axis=0)
+    total = len(pos_vectors) + len(neg_vectors)
+    return (np.sum(pos_vectors, axis=0) - np.sum(neg_vectors, axis=0)) / total
 
 def sort_by_similarity(target, candidates):
     candidates = [(i, c, compute_similarity(target, c)) for i, c in enumerate(candidates)]
