@@ -62,6 +62,9 @@ class CourseClient:
 
                     course.ID = idx
 
+                    if course.CODE in self.coursesCode:
+                        course.CODE = f"{course.CODE}_{idx}"
+
                     course_code = course.CODE
                     self.coursesCode[course_code] = course
                     self.courseId[idx] = course
