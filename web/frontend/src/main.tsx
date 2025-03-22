@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createHashRouter, RouterProvider } from "react-router";
 import Home from "@/app/page";
 import RecommendationsPage from "@/app/recommendations/page";
 import { QueryProvider } from "@/lib/query-provider";
@@ -9,7 +9,7 @@ import "./index.css";
 
 const root = document.getElementById("root")!;
 
-const router = createBrowserRouter(
+const router = createHashRouter(
   [
     {
       path: "/",
