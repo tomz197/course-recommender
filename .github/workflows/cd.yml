@@ -13,6 +13,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
+      - name: 'Setup backend'
+        run: cd ./web/backend && mv ./Dockerfile.prod ./Dockerfile
+
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
@@ -22,7 +25,7 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
 
       - name: 'Deploy to Artifact Registry'
-        run: gcloud builds submit . --dockerfile=web/backend/Dockerfile.prod --tag europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest
+        run: gcloud builds submit ./web/backend --tag europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest .
 
       - name: 'Deploy to Cloud Run'
         run: gcloud run deploy rec-sys-backend --image europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest --region europe-central2 --allow-unauthenticated --project pv254-RecSys --max-instances=4
