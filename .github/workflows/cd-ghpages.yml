@@ -37,6 +37,8 @@ jobs:
         run: cd ./web/frontend && npm run build
       - name: Setup CNAME
         run: cd ./web/frontend && echo "test.zifcak.dev" > ./dist/CNAME
+      - name: Setup environment
+        run: cd ./web/frontend && echo "VITE_API_URL=https://rec-sys-backend-185307783159.europe-central2.run.app"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
