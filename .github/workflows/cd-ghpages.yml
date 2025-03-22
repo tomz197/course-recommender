@@ -31,14 +31,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 23
+      - name: Setup environment
+        run: cd ./web/frontend && echo "VITE_API_URL=https://rec-sys-backend-185307783159.europe-central2.run.app" > ./.env
       - name: Install dependencies
         run: cd ./web/frontend && npm ci --force
       - name: Build page
         run: cd ./web/frontend && npm run build
       - name: Setup CNAME
         run: cd ./web/frontend && echo "test.zifcak.dev" > ./dist/CNAME
-      - name: Setup environment
-        run: cd ./web/frontend && echo "VITE_API_URL=https://rec-sys-backend-185307783159.europe-central2.run.app" > ./dist/.env
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
