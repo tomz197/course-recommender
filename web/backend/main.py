@@ -39,3 +39,7 @@ async def recommendations(liked: List[str], disliked: List[str], n: int, model: 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
     return ["embeddings_v1", "keywords"]
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
