@@ -1,6 +1,6 @@
 services:
   backend:
-    build: ./backend/
+    build: ./backend/dockerfile
     ports:
       - '8000:8000'
     volumes:

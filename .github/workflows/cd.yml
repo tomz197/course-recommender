@@ -1,0 +1,32 @@
+name: Deployment
+
+on:
+  push:
+    branchec: [main]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: 'Replace dockerfile with production'
+        run: mv ./web/backend/Dockerfile.prod ./web/backend/Dockerfile
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Deploy to Artifact Registry'
+        run: gcloud builds submit --tag europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest ./web/backend
+
+      - name: 'Deploy to Cloud Run'
+        run: gcloud run deploy rec-sys-backend --image europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest --region europe-central2 --allow-unauthenticated --project pv254-RecSys --max-instances=4 ./web/backend
+
