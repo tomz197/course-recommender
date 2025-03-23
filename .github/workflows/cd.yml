@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  push:
+    branchec: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-gcp:
+    name: Deploy backend to GCP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: 'Setup backend'
+        run: cd ./web/backend && mv ./Dockerfile.prod ./Dockerfile
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: 'Deploy to Artifact Registry'
+        run: gcloud builds submit ./web/backend --tag europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest
+
+      - name: 'Deploy to Cloud Run'
+        run: gcloud run deploy rec-sys-backend --image europe-central2-docker.pkg.dev/gen-lang-client-0866984282/backend/rec-sys-backend:latest --region europe-central2 --allow-unauthenticated --project gen-lang-client-0866984282 --max-instances=4
+
+  deploy-pages:
+    name: Deploy frontend to GitHub Pages
+    needs: [deploy-gcp]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23
+      - name: Setup environment
+        run: cd ./web/frontend && echo "VITE_API_URL=https://rec-sys-backend-185307783159.europe-central2.run.app" > ./.env
+      - name: Install dependencies
+        run: cd ./web/frontend && npm ci --force
+      - name: Build page
+        run: cd ./web/frontend && npm run build
+      - name: Setup CNAME
+        run: cd ./web/frontend && echo "test.zifcak.dev" > ./dist/CNAME
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web/frontend/dist
