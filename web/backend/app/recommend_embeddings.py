@@ -23,7 +23,10 @@ def score_by_adding_scores(liked_embeds, disliked_embeds, candidate_embed):
         score += compute_similarity(liked_embed, candidate_embed) ** 2
     
     for disliked_embed in disliked_embeds:
-        score -= 0.5 * compute_similarity(disliked_embed, candidate_embed) ** 2
+        # score -= 0.5 * compute_similarity(disliked_embed, candidate_embed) ** 2
+        similarity =  compute_similarity(disliked_embed, candidate_embed) ** 2
+        if similarity >= 0.9:
+            return 0
 
     return score
 
