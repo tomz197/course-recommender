@@ -8,15 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ThumbsDown, ThumbsUp, ArrowLeft, ExternalLink } from "lucide-react";
+import { ThumbsDown, ThumbsUp, ExternalLink } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
-import { useNavigate } from "react-router";
 import { storageController } from "@/storage";
 import { CourseSearch, Course, fullFacultyName } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 
 export default function RecommendationsPage() {
-  const navigate = useNavigate();
   const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
     new Map(),
   );
@@ -64,51 +62,33 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12 gap-8">
-      <Button variant="ghost" onClick={() => navigate("/")} className="mb-8">
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Selection
-      </Button>
-
-      <div className="flex flex-col items-center text-center mb-14">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-          Your Course Recommendations
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl">
-          Based on your preferences, we think you might enjoy these courses.
-          Give us feedback to improve your recommendations.
-        </p>
+    <main className="container mx-auto px-4 py-8 md:py-12 gap-8 my-auto">
+      <div className="flex flex-col justify-center max-w-2xl mx-auto">
+        <SelectedCourses
+          courses={Array.from(likedCourses.values()).reverse()}
+          onRemove={(courseId: string) => {
+            likedCourses.delete(courseId);
+            setLikedCourses(new Map(likedCourses));
+            void refetch();
+          }}
+          emptyMessage="No liked courses selected yet"
+          wrap={false}
+          title="Liked courses"
+        />
       </div>
 
       <div className="flex flex-col justify-center max-w-2xl mx-auto">
-        <p className="text-muted-foreground text-sm">Liked: </p>
-        <div className="overflow-x-scroll max-h-">
-          <SelectedCourses
-            courses={Array.from(likedCourses.values())}
-            onRemove={(courseId: string) => {
-              likedCourses.delete(courseId);
-              setLikedCourses(new Map(likedCourses));
-              void refetch();
-            }}
-            emptyMessage="No liked courses selected yet"
-            wrap={false}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col justify-center max-w-2xl mx-auto">
-        <p className="text-muted-foreground text-sm">Disliked: </p>
-        <div className="overflow-x-scroll">
-          <SelectedCourses
-            courses={Array.from(dislikedCourses.values())}
-            onRemove={(courseId: string) => {
-              dislikedCourses.delete(courseId);
-              setDislikedCourses(new Map(dislikedCourses));
-              void refetch();
-            }}
-            emptyMessage="No disliked courses selected yet"
-          />
-        </div>
+        <SelectedCourses
+          courses={Array.from(dislikedCourses.values()).reverse()}
+          onRemove={(courseId: string) => {
+            dislikedCourses.delete(courseId);
+            setDislikedCourses(new Map(dislikedCourses));
+            void refetch();
+          }}
+          emptyMessage="No disliked courses selected yet"
+          wrap={false}
+          title="Disiked courses"
+        />
       </div>
 
       <div className="flex justify-center mt-8">

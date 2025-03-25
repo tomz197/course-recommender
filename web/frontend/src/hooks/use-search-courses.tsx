@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { CourseSearch } from "@/types";
-import { allFacultySearch } from "@/lib/all_code_name_faculty";
+const { allFacultySearch } = await import("@/lib/all_code_name_faculty");
 
 const searchCourses = async (
   query: string,

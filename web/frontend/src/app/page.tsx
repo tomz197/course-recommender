@@ -15,6 +15,7 @@ import type {
 } from "@/types";
 import { useNavigate } from "react-router";
 import { storageController } from "@/storage";
+import { toast } from "sonner";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -43,13 +44,37 @@ export default function Home() {
   };
 
   const handleRemoveLikedCourse = (courseId: string) => {
+    const toRemove = likedCourses.get(courseId);
+    if (!toRemove) return;
+
     likedCourses.delete(courseId);
     setLikedCourses(new Map(likedCourses));
+
+    toast(`${courseId} removed from liked`, {
+      description: "Course removed from liked courses",
+      action: {
+        label: "Undo",
+        onClick: () => handleAddLikedCourse(toRemove),
+      }
+    }
+    );
   };
 
   const handleRemoveDislikedCourse = (courseId: string) => {
+    const toRemove = dislikedCourses.get(courseId);
+    if (!toRemove) return;
+
     dislikedCourses.delete(courseId);
     setDislikedCourses(new Map(dislikedCourses));
+
+    toast(`${courseId} removed from disliked`, {
+      description: "Course removed from disliked courses",
+      action: {
+        label: "Undo",
+        onClick: () => handleAddDislikedCourse(toRemove),
+      }
+    }
+    );
   };
 
   const handleGetRecommendations = () => {
@@ -61,12 +86,12 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12">
+    <main className="container mx-auto px-1 sm:px-4 py-4 sm:p-8 md:py-12">
       <div className="flex flex-col items-center text-center mb-12">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
           MUNI Course Recommendation
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl">
+        <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl">
           Help us understand your preferences by selecting courses you like and
           dislike, and we'll recommend courses tailored to your interests.
         </p>
@@ -81,14 +106,13 @@ export default function Home() {
               past
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex flex-col">
-            <div className="flex-1">
-              <SelectedCourses
-                courses={Array.from(likedCourses.values())}
-                onRemove={handleRemoveLikedCourse}
-                emptyMessage="No liked courses selected yet"
-              />
-            </div>
+          <CardContent className="space-y-4 flex flex-col justify-between flex-1">
+            <SelectedCourses
+              courses={Array.from(likedCourses.values())}
+              onRemove={handleRemoveLikedCourse}
+              emptyMessage="No liked courses selected yet"
+              title="Liked courses"
+            />
             <CourseSearch
               onSelectCourse={handleAddLikedCourse}
               placeholder="Search for courses you like..."
@@ -107,14 +131,13 @@ export default function Home() {
               Select courses that don't interest you or that you didn't enjoy
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 flex flex-col">
-            <div className="flex-1">
-              <SelectedCourses
-                courses={Array.from(dislikedCourses.values())}
-                onRemove={handleRemoveDislikedCourse}
-                emptyMessage="No disliked courses selected yet"
-              />
-            </div>
+          <CardContent className="space-y-4 flex flex-col justify-between flex-1">
+            <SelectedCourses
+              courses={Array.from(dislikedCourses.values())}
+              onRemove={handleRemoveDislikedCourse}
+              emptyMessage="No disliked courses selected yet"
+              title="Disliked courses"
+            />
             <CourseSearch
               onSelectCourse={handleAddDislikedCourse}
               placeholder="Search for courses you dislike..."
@@ -127,7 +150,7 @@ export default function Home() {
         </Card>
       </div>
 
-      <div className="flex justify-center">
+      <div className="flex flex-col justify-center sm:items-center">
         <Button
           size="lg"
           onClick={handleGetRecommendations}
@@ -135,6 +158,11 @@ export default function Home() {
         >
           Get Course Recommendations
         </Button>
+        {likedCourses.size === 0 && (
+          <p className="text-sm text-muted-foreground mt-1">
+            Select at least one course you like to get recommendations
+          </p>
+        )}
       </div>
     </main>
   );

@@ -5,6 +5,8 @@ import Home from "@/app/page";
 import RecommendationsPage from "@/app/recommendations/page";
 import { QueryProvider } from "@/lib/query-provider";
 import RootLayout from "@/app/layout";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider"
 import "./index.css";
 
 const root = document.getElementById("root")!;
@@ -25,8 +27,11 @@ const router = createHashRouter(
 
 ReactDOM.createRoot(root).render(
   <StrictMode>
-    <QueryProvider>
-      <RouterProvider router={router} />
-    </QueryProvider>
+    <ThemeProvider>
+      <QueryProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </QueryProvider>
+    </ThemeProvider>
   </StrictMode>,
 );

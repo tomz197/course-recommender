@@ -1,6 +1,8 @@
 services:
   backend:
-    build: ./backend/dockerfile
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - '8000:8000'
     volumes:
@@ -13,9 +15,7 @@ services:
       - backend
     build: ./frontend/
     ports:
-      - '5173:5173'
-    volumes:
-      - ./frontend:/app
+      - '8080:8080'
 
     environment:
       - CHOKIDAR_USEPOLLING=true
