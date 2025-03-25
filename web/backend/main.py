@@ -20,21 +20,32 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"]
 )
 
 courseClient = CourseClient("./assets/courses/")
-#all_embeds: npt.NDArray = np.load(f"./assets/embeds.npy", allow_pickle=True)
 all_embeds: npt.NDArray = np.load(f"./assets/embeds_all.npy", allow_pickle=True)
 
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def recommendations(liked: List[str], disliked: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
+    recommended_courses = None
+
     if model == "embeddings_v1":
-        recommended_courses, _ = recommend_courses(liked, disliked, all_embeds, courseClient, n)
-        return RecommendationResponse(recommended_courses=recommended_courses)
+        recommended_courses = recommend_courses(liked, disliked, all_embeds, courseClient, n)
     elif model == "keywords":
-        return RecommendationResponse(recommended_courses=recommend_courses_keywords(liked, disliked, courseClient, n))
+        recommended_courses = recommend_courses_keywords(liked, disliked, courseClient, n)
+
+    if recommended_courses is None:
+        raise ValueError("Model not found")
+    return RecommendationResponse(recommended_courses=recommended_courses)
+
+@app.get("/course/{course_id}", response_model=CourseWithId)
+async def course(course_id: str) -> CourseWithId:
+    found = courseClient.get_course_by_code(course_id)
+    if found is None:
+        raise ValueError("Course not found")
+    return found
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
