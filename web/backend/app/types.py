@@ -49,3 +49,11 @@ class CourseWithId(Course):
     ID: Optional[int] = 0
     SIMILARITY: float = 0.0
 
+@dataclass
+class FeedbackLog():
+    liked: List[str]
+    disliked: List[str]
+    course: str
+    like: bool
+    user_id: str
+    model: str

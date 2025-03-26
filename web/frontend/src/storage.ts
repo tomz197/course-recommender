@@ -28,8 +28,18 @@ function resetCoursePreferences() {
   localStorage.removeItem("coursePreferences");
 }
 
+function getUserID() {
+  if (localStorage.getItem('userId')) {
+    return localStorage.getItem('userId');
+  }
+  const newUserId = crypto.randomUUID();
+  localStorage.setItem('userId', newUserId);
+  return newUserId;
+}
+
 export const storageController = {
   getCoursePreferences,
   setCoursePreferences,
   resetCoursePreferences,
+  getUserID,
 };

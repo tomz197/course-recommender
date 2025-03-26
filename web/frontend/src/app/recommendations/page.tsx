@@ -13,6 +13,7 @@ import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
 import { CourseSearch, Course, fullFacultyName } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
+import { logFeedback } from "@/lib/log-feedback";
 
 export default function RecommendationsPage() {
   const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
@@ -43,6 +44,11 @@ export default function RecommendationsPage() {
 
   const handleFeedback = async (feedback: "dislike" | "neutral" | "like") => {
     if (!recommendation) return;
+
+    logFeedback({
+      liked: likedCourses,
+      disliked: dislikedCourses,
+    }, recommendation, feedback === "like");
 
     if (feedback === "dislike") {
       setDislikedCourses(

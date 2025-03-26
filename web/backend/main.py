@@ -9,7 +9,8 @@ import numpy as np
 from app.recommend_embeddings import recommend_courses
 from app.recommend_keywords import recommend_courses_keywords
 from app.courses import CourseClient
-from app.types import CourseWithId
+from app.types import CourseWithId, FeedbackLog
+from app.db.mongo import MongoDBLogger
 
 @dataclass
 class RecommendationResponse:
@@ -26,6 +27,7 @@ app.add_middleware(
 
 courseClient = CourseClient("./assets/courses/")
 all_embeds: npt.NDArray = np.load(f"./assets/embeds_all.npy", allow_pickle=True)
+db = MongoDBLogger()
 
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def recommendations(liked: List[str], disliked: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
@@ -54,3 +56,7 @@ async def models() -> List[str]:
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+@app.post("/log_feedback")
+async def log_feedback(log: FeedbackLog):
+    db.log_feedback(log.liked, log.disliked, log.course, log.like, log.user_id, log.model)
