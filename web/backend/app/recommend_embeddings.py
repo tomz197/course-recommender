@@ -9,51 +9,34 @@ Embedding: TypeAlias = npt.NDArray[np.float32]
 Embeddings: TypeAlias = npt.NDArray[np.float32]
 Similarity: TypeAlias = float # or score
 
-def compute_similarity(vector1: Embedding, vector2: Embedding) -> Similarity:
-    '''
-        Compute cosine (similarity) between two vectors:
-         - `1`: vectors are the same
-         - `0`: vectors are orthogonal
-         - `-1`: vectors are opposite
-    '''
-    return np.dot(vector1, vector2) / (np.linalg.norm(vector1) * np.linalg.norm(vector2))
-
-def score_with_one_interest_embed(liked: Embeddings, disliked: Embeddings, candidate: Embedding) -> Similarity:
-    total = len(liked) + len(disliked)
-    combined_embed = (np.sum(liked, axis=0) - np.sum(disliked, axis=0)) / total
-
-    return compute_similarity(combined_embed, candidate)
-
-def score_by_adding_scores(liked: Embeddings, disliked: Embeddings, candidate: Embedding) -> Similarity:
-    score: Similarity = 0
-    for vec in liked:
-        score += compute_similarity(vec, candidate) ** 2
-
-    for vec in disliked:
-        # score -= 0.5 * compute_similarity(disliked_embed, candidate_embed) ** 2
-        similarity =  compute_similarity(vec, candidate) ** 2 
-        if similarity >= 0.9: # TODO: WTF 
-            return 0
-
-    return score
 
 def sort_by_similarity(
         liked_embeds: Embeddings,
         disliked_embeds: Embeddings,
         candidate_embeds: Embeddings,
-        algorithm: Optional[Literal["new", "old"]] = "new"
     ) -> List[Tuple[int, Embedding, Similarity]]:
-    candidates: List[Tuple[int, Embedding, Similarity]]
-
-    if algorithm == "new":
-        candidates = [(i, c, score_by_adding_scores(liked_embeds, disliked_embeds, c)) for i, c in enumerate(candidate_embeds)]
-    elif algorithm == "old":
-        candidates = [(i, c, score_with_one_interest_embed(liked_embeds, disliked_embeds, c)) for i, c in enumerate(candidate_embeds)]
-    else:
-        raise ValueError(f"Unknown algorithm: {algorithm}")
-
-    candidates.sort(key=lambda x: x[2], reverse=True)
-    return candidates
+    liked_norms = np.linalg.norm(liked_embeds, axis=1)
+    disliked_norms = np.linalg.norm(disliked_embeds, axis=1)
+    
+    scores = []
+    for i, candidate in enumerate(candidate_embeds):
+        candidate_norm = np.linalg.norm(candidate)
+        
+        disliked_dots = np.dot(disliked_embeds, candidate)
+        disliked_similarities = disliked_dots / (disliked_norms * candidate_norm)
+        
+        if np.any(disliked_similarities >= 0.9):
+            scores.append((i, candidate, 0))
+            continue
+            
+        liked_dots = np.dot(liked_embeds, candidate)
+        liked_similarities = liked_dots / (liked_norms * candidate_norm)
+        score = np.sum(liked_similarities ** 2)
+        
+        scores.append((i, candidate, score))
+    
+    scores.sort(key=lambda x: x[2], reverse=True)
+    return scores
 
 def recommend_courses(
         liked_codes: List[str],
@@ -68,8 +51,10 @@ def recommend_courses(
     liked_embeds = all_embeds[liked_ids]
     disliked_embeds = all_embeds[disliked_ids]
 
+    top_candidates = sort_by_similarity(liked_embeds, disliked_embeds, all_embeds)
+    
     res: List[CourseWithId] = []
-    for idx, _, _ in sort_by_similarity(liked_embeds, disliked_embeds, all_embeds, "new"):
+    for idx, _, _ in top_candidates:
         if len(res) == n:
             break
 
