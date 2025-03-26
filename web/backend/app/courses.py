@@ -1,6 +1,6 @@
 import os
 import json
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 from app.types import CourseWithId
 
 """
@@ -89,13 +89,12 @@ class CourseClient:
         return self.courseId.get(course_id)
     
     def get_course_ids_by_codes(self, courses_codes: List[str]) -> List[int]:
-        """
-        Get IDs for a list of course codes, efficiently skipping any that don't exist.
-        
-        :param courses_codes: List of course codes to look up
-        :return: List of corresponding course IDs for courses that exist
-        """
-        return [self.coursesCode[code].ID for code in courses_codes if code in self.coursesCode]
+        res = []
+        for code in courses_codes:
+            course = self.get_course_by_code(code)
+            if course is not None:
+                res.append(course.ID)
+        return res
 
     def all_courses(self) -> List[CourseWithId]:
         """
