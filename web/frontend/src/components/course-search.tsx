@@ -70,6 +70,14 @@ export function CourseSearch({
     setOpen(false)
   }
 
+  // Handle key press for Enter key to select top result
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && open && filteredCourses.length > 0 && !isLoading) {
+      e.preventDefault()
+      handleSelectCourse(filteredCourses[0])
+    }
+  }
+
   return (
     <div className="relative w-full">
       <div className="relative">
@@ -78,6 +86,7 @@ export function CourseSearch({
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => searchQuery.length > 0 && setOpen(true)}
           placeholder={placeholder}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

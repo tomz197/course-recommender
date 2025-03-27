@@ -101,31 +101,29 @@ function ShowDetails({
       <DialogTrigger >
         <span className="text-muted-foreground underline text-sm">Show details</span>
       </DialogTrigger>
-      <DialogContent>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{title}</DialogTitle>
-          </DialogHeader>
-          <ScrollArea className="h-[60dvh]">
-            <div className="flex flex-col divide-y px-1">
-              {courses.map((course) => (
-                <div key={course.CODE} className="flex justify-between py-2 px-1 items-center">
-                  <div className="flex flex-col">
-                    <span ><span className="font-bold">{course.CODE} </span> - {course.FACULTY}</span>
-                    <span>{course.NAME}</span>
-                  </div>
-                  <Button
-                    onClick={() => onRemove(course.CODE)}
-                    size="icon"
-                    variant="ghost"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+    <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
+        <ScrollArea className="h-[60dvh]">
+          <div className="flex flex-col divide-y px-1">
+            {courses.map((course) => (
+              <div key={course.CODE} className="flex justify-between py-2 px-1 items-center">
+                <div className="flex flex-col">
+                  <span ><span className="font-bold">{course.CODE} </span> - {course.FACULTY}</span>
+                  <span>{course.NAME}</span>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </DialogContent>
+                <Button
+                  onClick={() => onRemove(course.CODE)}
+                  size="icon"
+                  variant="ghost"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )

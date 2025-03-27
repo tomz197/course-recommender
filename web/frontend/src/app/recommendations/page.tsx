@@ -68,8 +68,9 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8 md:py-12 gap-8 my-auto">
-      <div className="flex flex-col justify-center max-w-2xl mx-auto">
+    <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto">
+
+      <div className="flex flex-col justify-center max-w-2xl mx-auto gap-2 p-2">
         <SelectedCourses
           courses={Array.from(likedCourses.values()).reverse()}
           onRemove={(courseId: string) => {
@@ -81,9 +82,6 @@ export default function RecommendationsPage() {
           wrap={false}
           title="Liked courses"
         />
-      </div>
-
-      <div className="flex flex-col justify-center max-w-2xl mx-auto">
         <SelectedCourses
           courses={Array.from(dislikedCourses.values()).reverse()}
           onRemove={(courseId: string) => {
@@ -97,7 +95,7 @@ export default function RecommendationsPage() {
         />
       </div>
 
-      <div className="flex justify-center mt-8">
+      <div className="flex justify-center">
         {isError ? <ErrorCard error={error} /> : null}
 
         {recommendation ? (
@@ -171,30 +169,96 @@ function CourseCard({
   isLoading: boolean;
   recommendation: Course;
 }) {
+  const getFacultyColor = (faculty: string) => ({
+    'FI': '#f2d45c',
+    'FF': '#4bc8ff',
+    'FSS': '#008c78',
+    'ESF': '#b9006e',
+    'PrF': '#9100dc',
+    'LF': '#f01928',
+    'PdF': '#ff7300',
+    'FaF': '#56788d',
+    'FSpS': '#5ac8af',
+    'CST': '#0031e7',
+    'PřF': '#00af3f'
+  })[faculty] || '#000000';
+
   return (
-    <Card className="w-full max-w-2xl">
+    <Card className="w-full max-w-2xl rounded-none sm:rounded-lg">
       <CardHeader>
         <CardTitle className="flex justify-between items-start">
           <div>
-            {recommendation.CODE} {recommendation.NAME}
-            <span className="block text-sm font-normal text-muted-foreground mt-1">
-              {fullFacultyName(recommendation.FACULTY)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm text-white px-2 py-1 rounded text-nowrap" style={{ backgroundColor: getFacultyColor(recommendation.FACULTY) }}>
+                {recommendation.CODE}
+                {" "}
+                {recommendation.FACULTY}
+              </span>
+              <div className="flex items-center gap-2 mb-0.5 text-sm text-muted-foreground flex-wrap">
+                <span>{recommendation.SEMESTER}</span>
+                <span>•</span>
+                <span>{recommendation.LANGUAGE}</span>
+                {recommendation.CREDITS && (
+                  <>
+                    <span>•</span>
+                    <span>{recommendation.CREDITS} credits</span>
+                  </>
+                )}
+                {/*
+                <span>•</span>
+                <span>{recommendation.COMPLETION}</span>
+                  { recommendation.STUDENTS_ENROLLED && recommendation.STUDENTS_PASSED && (
+                  <>
+                    <span>•</span>
+                    <span>success rate: {(parseInt(recommendation.STUDENTS_PASSED) / parseInt(recommendation.STUDENTS_ENROLLED) * 100).toFixed(2)}%</span>
+                  </>
+                )}
+                */}
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold mt-2">{recommendation.NAME}</h2>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <p>
-          {recommendation.DESCRIPTION ||
-            "This course is recommended based on your preferences. No detailed description available."}
-        </p>
+      <CardContent className="space-y-4">
+        {/* Description */}
+        <div>
+          <h3 className="font-medium mb-2">Description</h3>
+          <p className="text-muted-foreground">
+            {recommendation.DESCRIPTION ||
+              "This course is recommended based on your preferences. No detailed description available."}
+          </p>
+        </div>
+
+        {/* Keywords */}
+        {recommendation.KEYWORDS && recommendation.KEYWORDS.length > 0 && (
+          <div>
+            <h3 className="font-medium mb-2">Keywords</h3>
+            <div className="overflow-x-auto pb-2">
+              <div className="flex gap-2 min-w-max">
+                {recommendation.KEYWORDS.map((keyword, index) => (
+                  <span
+                    key={index}
+                    className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-sm whitespace-nowrap"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* External Link */}
         <a
-          href={`https://is.muni.cz/predmet/${recommendation.FACULTY === "P\u0159F" ? "sci" : recommendation.FACULTY}/${recommendation.CODE}`}
+          href={`https://is.muni.cz/predmet/${
+            recommendation.FACULTY === "P\u0159F" ? "sci" : recommendation.FACULTY
+          }/${recommendation.CODE}`}
           target="_blank"
           rel="noreferrer"
-          className="text-blue-500 hover:text-blue-700 hover:underline text-sm flex items-center"
+          className="inline-flex items-center hover:underline text-sm text-blue-500 hover:text-blue-600"
         >
-          Open in IS MU <ExternalLink className="h-4 w-4 ml-1 " />
+          View in IS MU <ExternalLink className="h-4 w-4 ml-1" />
         </a>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -208,16 +272,6 @@ function CourseCard({
               <ThumbsDown className="mr-2 h-4 w-4" />
               Dislike
             </Button>
-            {/*
-            <Button
-              variant="outline"
-              onClick={() => handleFeedback("neutral")}
-              className="flex-1 mx-2"
-            >
-              <Minus className="mr-2 h-4 w-4" />
-              Neutral
-            </Button>
-                */}
             <Button
               onClick={() => handleFeedback("like")}
               className="flex-1 ml-2"

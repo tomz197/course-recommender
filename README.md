@@ -1,35 +1,87 @@
-# pv254-project
+# MUNI Course Recommender
 
-Recommendation system for MUNI courses.
+A recommendation system for Masaryk University (MUNI) courses leveraging natural language processing and machine learning techniques to suggest relevant courses based on user preferences.
 
-Checkout `./notebooks/visualize_embeddings.ipynb` for a cool visualization.
+## Project Overview
 
-## Structure
+This project provides a comprehensive course recommendation system that helps students discover courses that match their interests. It employs two main recommendation approaches:
 
-- `/notebooks` - contains Jupyter notebooks with data analysis and model training
-- `/notebooks/data` - contains data used in the notebooks
-- `/notebooks/scripts` - contains scripts used in the notebooks
+1. **Embedding-based recommendations** - Uses text embeddings to find semantically similar courses
+2. **Keyword-based recommendations** - Uses keyword intersection to suggest related courses
 
-- `/web` - contains the web application
-- `/web/frontend` - contains the frontend of the web application
-- `/web/backend` - contains the backend of the web application
+## Repository Structure
 
-## Setup (web application)
+### Data Analysis and Model Training
+- `/notebooks/` - Jupyter notebooks for data analysis, embedding generation, and model evaluation
+  - `simple-similarity.ipynb` - Keyword-based recommendation system
+  - `embeddings.ipynb` - Text embedding generation and similarity analysis
+  - `visualize_embeddings.ipynb` - Interactive visualization of course embeddings
+  - `sentence_transformers.ipynb` - Experiments with transformer models
+  - `gemini_embeddings.ipynb` - Explorations with Google's Gemini embeddings
 
-### Requirements
+- `/notebooks/data/` - Data files used in analysis
+  - `/formatted/` - Processed course data
+  - `/generated/` - Generated data artifacts
+  - `/embeddings/` - Stored course embeddings
+  - `/intersects/` - Keyword intersection matrices
 
-- Docker
+- `/notebooks/scripts/` - Helper scripts for notebooks
 
-### Running the web application
+### Web Application
+- `/web/` - Web application for course recommendations
+  - `docker-compose.yml` - Docker configuration for the entire web application
+- `/web/backend/` - FastAPI-based backend service
+- `/web/frontend/` - React/TypeScript frontend
 
-Go to the `/web` directory and run the following commands:
+## Setup Instructions
 
-```
-docker-compose up --build
-```
+### Prerequisites
+- Docker and Docker Compose
+- Python 3.8+ (for notebook development)
+- Node.js and npm (for frontend development)
 
-The web application should be running on `http://localhost:5173`.
+### Running the Web Application
 
-## Setup (notebooks)
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tomz197/pv254-project.git
+   cd pv254-project
+   ```
 
-There isn't one, GO WITH THE FLOW!
+2. Set up environment variables:
+   - Copy `.env.example` to `.env` in the root directory
+   - Copy `web/backend/.env.example` to `web/backend/.env`
+   - Copy `web/frontend/.env.example` to `web/frontend/.env`
+
+3. Start the application using Docker Compose:
+   ```bash
+   cd web
+   docker-compose up --build
+   ```
+
+4. Access the web application at `http://localhost:8080`
+
+### Running the Notebooks
+
+1. Install required Python packages:
+   ```bash
+   pip install jupyter pandas numpy scikit-learn sentence-transformers matplotlib tqdm
+   ```
+
+2. Launch Jupyter:
+   ```bash
+   cd notebooks
+   jupyter notebook
+   ```
+
+3. Open notebooks in your browser and run cells interactively
+
+## Featured Notebooks
+
+- `visualize_embeddings.ipynb` - An interactive visualization of course embeddings that demonstrates how different courses relate to each other in the embedding space
+- `simple-similarity.ipynb` - A demonstration of keyword-based course recommendations
+- `embeddings.ipynb` - The main notebook for generating course embeddings and evaluating recommendation quality
+
+## License
+
+This project is licensed under the terms of the license included in the repository.

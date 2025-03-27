@@ -1,23 +1,50 @@
+version: '3.8'
+
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: 
+      context: ./backend/
     ports:
       - '8000:8000'
     volumes:
       - ./backend:/app
+      - backend_cache:/root/.cache/pip
+    env_file:
+      - ./backend/.env
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - HOST_HOSTNAME=localhost
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     depends_on:
       - backend
-    build: ./frontend/
+    build: 
+      context: ./frontend/
     ports:
       - '8080:8080'
-
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    env_file:
+      - ./frontend/.env
     environment:
       - CHOKIDAR_USEPOLLING=true
       - VITE_API_URL=http://localhost:8000
+      - NODE_ENV=development
+      - DEBUG=1
+      - NODE_OPTIONS=--inspect
+    command: sh -c "npm install && npm run dev -- --host=0.0.0.0 --port=8080"
+
+volumes:
+  backend_cache:
+  frontend_node_modules:
 
