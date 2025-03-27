@@ -41,7 +41,7 @@ export default function RootLayout() {
           </div>
         </header>
 
-        <div className="flex justify-center p-4 flex-1">
+        <div className="flex justify-center flex-1">
           <Outlet />
         </div>
       </div>
