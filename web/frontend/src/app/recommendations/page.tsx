@@ -204,16 +204,8 @@ function CourseCard({
                     <span>{recommendation.CREDITS} credits</span>
                   </>
                 )}
-                {/*
                 <span>•</span>
                 <span>{recommendation.COMPLETION}</span>
-                  { recommendation.STUDENTS_ENROLLED && recommendation.STUDENTS_PASSED && (
-                  <>
-                    <span>•</span>
-                    <span>success rate: {(parseInt(recommendation.STUDENTS_PASSED) / parseInt(recommendation.STUDENTS_ENROLLED) * 100).toFixed(2)}%</span>
-                  </>
-                )}
-                */}
               </div>
             </div>
             <h2 className="text-xl font-semibold mt-2">{recommendation.NAME}</h2>
@@ -223,8 +215,8 @@ function CourseCard({
       <CardContent className="space-y-4">
         {/* Description */}
         <div>
-          <h3 className="font-medium mb-2">Description</h3>
-          <p className="text-muted-foreground">
+          <h3 className="font-medium mb-1">Description</h3>
+          <p className="font-light">
             {recommendation.DESCRIPTION ||
               "This course is recommended based on your preferences. No detailed description available."}
           </p>
@@ -234,7 +226,7 @@ function CourseCard({
         {recommendation.KEYWORDS && recommendation.KEYWORDS.length > 0 && (
           <div>
             <h3 className="font-medium mb-2">Keywords</h3>
-            <div className="overflow-x-auto pb-2">
+            <div className="overflow-x-auto pb-1">
               <div className="flex gap-2 min-w-max">
                 {recommendation.KEYWORDS.map((keyword, index) => (
                   <span
