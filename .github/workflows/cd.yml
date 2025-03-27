@@ -59,7 +59,7 @@ jobs:
       - name: Build page
         run: cd ./web/frontend && npm run build
       - name: Setup CNAME
-        run: cd ./web/frontend && echo "test.zifcak.dev" > ./dist/CNAME
+        run: cd ./web/frontend && echo "recommend.muni.courses" > ./dist/CNAME
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
