@@ -11,7 +11,7 @@ import {
 import { ThumbsDown, ThumbsUp, ExternalLink } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
-import { CourseSearch, Course, fullFacultyName } from "@/types";
+import { CourseSearch, Course } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
 
