@@ -2,11 +2,18 @@ FROM node:23-alpine
 
 WORKDIR /app
 
-COPY package.json .
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    wget
 
-RUN npm install --force
+# Copy package files
+COPY package*.json ./
 
-RUN npm install --global vite
+# Install dependencies
+RUN npm ci
 
 COPY . .
 
