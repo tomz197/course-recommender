@@ -1,7 +1,9 @@
 import os
+import json
 import pandas as pd
-from typing import List, Optional 
+from typing import Dict, List, Optional, Any
 from app.types import CourseWithId
+
 
 class CourseClient:
     """
@@ -13,18 +15,12 @@ class CourseClient:
         :param data_dir: Path to the directory with JSON files containing courses.
         """
         self.data_dir: str = data_dir
-        self.df: Optional[pd.DataFrame] = None
-        self.id_df: Optional[pd.DataFrame] = None
-        self._load_courses()
 
-    def _load_courses(self) -> None:
-        self.df = pd.read_csv(os.path.join(self.data_dir, "courses.csv"))
-        self.id_df = pd.read_csv(os.path.join(self.data_dir, "id_lookup.csv"))
+        self.df = pd.read_parquet(os.path.join(self.data_dir, "courses.parquet"))
+        self.id_df = pd.read_parquet(os.path.join(self.data_dir, "id_lookup.parquet"))
 
         self.df.set_index('CODE', drop=False, inplace=True)
         self.id_df.set_index('ID', drop=False, inplace=True)
-        
-        return
         
     def get_course_by_code(self, code: str) -> Optional[CourseWithId]:
         """

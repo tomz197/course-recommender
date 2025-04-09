@@ -3,3 +3,5 @@ numpy
 pandas
 scipy
 pymongo==4.10.1
+python-dotenv
+pyarrow
