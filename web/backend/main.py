@@ -12,6 +12,8 @@ from app.courses import CourseClient
 from app.types import CourseWithId, FeedbackLog
 from app.db.mongo import MongoDBLogger
 
+import os
+
 @dataclass
 class RecommendationResponse:
     recommended_courses: List[CourseWithId]
@@ -25,8 +27,8 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-courseClient = CourseClient("./assets/courses/")
-all_embeds: npt.NDArray = np.load(f"./assets/embeds_all.npy", allow_pickle=True)
+courseClient = CourseClient(os.path.join("assets", "courses"))
+all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeds_all.npy"), allow_pickle=True)
 db = MongoDBLogger()
 
 @app.post("/recommendations", response_model=RecommendationResponse)

@@ -1,23 +1,11 @@
 import os
-import json
-from typing import Dict, List, Optional
+import pandas as pd
+from typing import List, Optional 
 from app.types import CourseWithId
-
-"""
-def load_courses(dir_path) -> Tuple[List[Dict[str, Any]], Dict[str, int]]:
-    files = os.listdir(dir_path)
-    courses = []
-    for file in files:
-        with open(f"{dir_path}/{file}", "r") as f:
-            courses.append(json.load(f))
-    courses = courses[0]
-    ctoi = {course["CODE"]: i for i, course in enumerate(courses)}
-    return courses, ctoi
-"""
 
 class CourseClient:
     """
-    A client class to load and manage courses in an in-memory dictionary keyed by 'CODE'.
+    A client class to load and manage courses using pandas for optimized storage and retrieval.
     """
 
     def __init__(self, data_dir: str = "data/generated") -> None:
@@ -25,81 +13,69 @@ class CourseClient:
         :param data_dir: Path to the directory with JSON files containing courses.
         """
         self.data_dir: str = data_dir
-        self.coursesCode: Dict[str, CourseWithId] = {}
-        self.courseId: Dict[int, CourseWithId] = {}
+        self.df: Optional[pd.DataFrame] = None
+        self.id_df: Optional[pd.DataFrame] = None
         self._load_courses()
 
     def _load_courses(self) -> None:
-        """Loads all courses from JSON files in the data directory into a dictionary keyed by 'CODE'."""
-        #files: List[str] = os.listdir(self.data_dir)
-        files: List[str] = [
-            "cst.json",
-            "esf.json",
-            "faf.json",
-            "ff.json",
-            "fi.json",
-            "fsps.json",
-            "fss.json",
-            "lf.json",
-            "pdf.json",
-            "prf.json",
-            "přf.json",
-        ]
-        idx: int = 0
-        for filename in files:
-            if not filename.lower().endswith(".json"):
-                continue
+        self.df = pd.read_csv(os.path.join(self.data_dir, "courses.csv"))
+        self.id_df = pd.read_csv(os.path.join(self.data_dir, "id_lookup.csv"))
 
-            with open(os.path.join(self.data_dir, filename), "r", encoding="utf-8") as f:
-                data: List[dict] = json.load(f) 
-                for c in data:
-                    try:
-                        course = CourseWithId(**c)
-                    except TypeError as e:
-                        print(f"Error loading course from file {filename} at index {idx}: {e}")
-                        print(f"Course data: {c}")
-                        raise
-
-                    course.ID = idx
-
-                    if course.CODE in self.coursesCode:
-                        course.CODE = f"{course.CODE}_{idx}"
-
-                    course_code = course.CODE
-                    self.coursesCode[course_code] = course
-                    self.courseId[idx] = course
-                    idx += 1
-
+        self.df.set_index('CODE', drop=False, inplace=True)
+        self.id_df.set_index('ID', drop=False, inplace=True)
+        
+        return
+        
     def get_course_by_code(self, code: str) -> Optional[CourseWithId]:
         """
         Retrieves a single course by its code.
 
         :param code: The course code, e.g., 'CORE012'.
-        :return: The course dictionary or None if not found.
+        :return: The course or None if not found.
         """
-        return self.coursesCode.get(code)
+        try:
+            row = self.df.loc[code]
+            return CourseWithId(**row.to_dict())
+        except (KeyError, TypeError):
+            return None
 
     def get_course_by_id(self, course_id: int) -> Optional[CourseWithId]:
         """
         Retrieves a single course by its ID.
 
         :param course_id: The course ID.
-        :return: The course dictionary or None if not found.
+        :return: The course or None if not found.
         """
-        return self.courseId.get(course_id)
-    
+        try:
+            idx = self.id_df.loc[course_id, 'index']
+            row = self.df.iloc[idx]
+            return CourseWithId(**row.to_dict())
+        except (KeyError, TypeError):
+            return None
+        
     def get_course_ids_by_codes(self, courses_codes: List[str]) -> List[int]:
-        res = []
+        """
+        Gets a list of course IDs from their codes.
+        
+        :param courses_codes: List of course codes
+        :return: List of course IDs for valid codes
+        """
+        result = []
         for code in courses_codes:
-            course = self.get_course_by_code(code)
-            if course is not None:
-                res.append(course.ID)
-        return res
+            try:
+                course = self.df.loc[code]
+                result.append(int(course['ID']))
+            except KeyError:
+                continue
+        return result
 
     def all_courses(self) -> List[CourseWithId]:
         """
-        Returns all courses as a list of dictionaries.
+        Returns all courses as a list, sorted by ID.
 
-        :return: A list of course dictionaries.
+        :return: A list of all courses sorted by ID.
         """
-        return list(self.coursesCode.values())
+        # Sort by ID before converting to records
+        sorted_df = self.df.sort_values('ID')
+        records = sorted_df.to_dict(orient='records')
+        return [CourseWithId(**record) for record in records]
