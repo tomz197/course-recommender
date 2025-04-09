@@ -47,8 +47,10 @@ async def recommendations(liked: List[str], disliked: List[str], n: int, model: 
 @app.get("/course/{course_id}", response_model=CourseWithId)
 async def course(course_id: str) -> CourseWithId:
     found = courseClient.get_course_by_code(course_id)
+    print(found)
     if found is None:
         raise ValueError("Course not found")
+        
     return found
 
 @app.get("/models", response_model=List[str])
@@ -56,9 +58,9 @@ async def models() -> List[str]:
     return ["embeddings_v1", "keywords"]
 
 @app.get("/health")
-async def health():
+async def health() -> dict:
     return {"status": "ok"}
 
 @app.post("/log_feedback")
-async def log_feedback(log: FeedbackLog):
+async def log_feedback(log: FeedbackLog) -> None:
     db.log_feedback(log.liked, log.disliked, log.course, log.like, log.user_id, log.model)

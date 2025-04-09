@@ -31,7 +31,7 @@ def sort_by_similarity(
             
         liked_dots = np.dot(liked_embeds, candidate)
         liked_similarities = liked_dots / (liked_norms * candidate_norm)
-        score = np.sum(liked_similarities ** 2)
+        score = Similarity(np.sum(liked_similarities ** 2))
         
         scores.append((i, candidate, score))
     
@@ -47,6 +47,9 @@ def recommend_courses(
     ) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked_codes)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked_codes)
+    
+    if not liked_ids:
+        return []
 
     liked_embeds = all_embeds[liked_ids]
     disliked_embeds = all_embeds[disliked_ids]
@@ -54,7 +57,7 @@ def recommend_courses(
     top_candidates = sort_by_similarity(liked_embeds, disliked_embeds, all_embeds)
     
     res: List[CourseWithId] = []
-    for idx, _, _ in top_candidates:
+    for idx, _, sim in top_candidates:
         if len(res) == n:
             break
 
@@ -63,6 +66,7 @@ def recommend_courses(
             continue
 
         if found.CODE not in liked_codes and found.CODE not in disliked_codes:
+            found.SIMILARITY = sim
             res.append(found)
 
     return res

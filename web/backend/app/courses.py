@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+import numpy as np
 from typing import Dict, List, Optional, Any
 from app.types import CourseWithId
 
@@ -22,6 +23,18 @@ class CourseClient:
         self.df.set_index('CODE', drop=False, inplace=True)
         self.id_df.set_index('ID', drop=False, inplace=True)
         
+    def _convert_numpy_arrays(self, course_dict: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Convert any numpy arrays in the course dictionary to Python lists for serialization.
+        
+        :param course_dict: Dictionary containing course data
+        :return: Dictionary with numpy arrays converted to lists
+        """
+        for key, value in course_dict.items():
+            if isinstance(value, np.ndarray):
+                course_dict[key] = value.tolist()
+        return course_dict
+
     def get_course_by_code(self, code: str) -> Optional[CourseWithId]:
         """
         Retrieves a single course by its code.
@@ -31,7 +44,8 @@ class CourseClient:
         """
         try:
             row = self.df.loc[code]
-            return CourseWithId(**row.to_dict())
+            course_dict = self._convert_numpy_arrays(row.to_dict())
+            return CourseWithId(**course_dict)
         except (KeyError, TypeError):
             return None
 
@@ -45,7 +59,8 @@ class CourseClient:
         try:
             idx = self.id_df.loc[course_id, 'index']
             row = self.df.iloc[idx]
-            return CourseWithId(**row.to_dict())
+            course_dict = self._convert_numpy_arrays(row.to_dict())
+            return CourseWithId(**course_dict)
         except (KeyError, TypeError):
             return None
         
@@ -74,4 +89,4 @@ class CourseClient:
         # Sort by ID before converting to records
         sorted_df = self.df.sort_values('ID')
         records = sorted_df.to_dict(orient='records')
-        return [CourseWithId(**record) for record in records]
+        return [CourseWithId(**self._convert_numpy_arrays(record)) for record in records]

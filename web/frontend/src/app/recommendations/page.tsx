@@ -264,6 +264,15 @@ function CourseCard({
               <ThumbsDown className="mr-2 h-4 w-4" />
               Dislike
             </Button>
+            {/*
+            <Button
+              onClick={() => handleFeedback("like")}
+              className="flex-1 ml-2"
+              variant="outline"
+            >
+              Skip
+            </Button>
+            */}
             <Button
               onClick={() => handleFeedback("like")}
               className="flex-1 ml-2"
