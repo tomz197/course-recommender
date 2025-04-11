@@ -48,11 +48,27 @@ function setPredictionModel(model: string) {
   localStorage.setItem('predictionModel', model);
 }
 
+function resetStorage() {
+  localStorage.clear();
+}
+
+function getRecommendedCount(): number {
+  return parseInt(localStorage.getItem('recommendedCount') || '0');
+}
+
+function incrementRecommendedCount() {
+  const count = getRecommendedCount();
+  localStorage.setItem('recommendedCount', (count + 1).toString());
+}
+
 export const storageController = {
   getCoursePreferences,
   setCoursePreferences,
   resetCoursePreferences,
+  resetStorage,
   getUserID,
   getPredictionModel,
   setPredictionModel,
+  getRecommendedCount,
+  incrementRecommendedCount,
 };

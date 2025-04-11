@@ -68,7 +68,7 @@ export default function RootLayout() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    storageController.resetCoursePreferences();
+                    storageController.resetStorage();
                     navigate("/");
                     void (async () => {
                       await setPredictionModel(true);

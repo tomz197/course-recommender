@@ -8,6 +8,7 @@ import { storageController } from "@/storage";
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
+  storageController.incrementRecommendedCount();
   const model = storageController.getPredictionModel();
   const res = (await fetch(
     import.meta.env.VITE_API_URL + `/recommendations?n=1&model=${model}`,

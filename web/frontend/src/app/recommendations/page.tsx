@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ThumbsDown, ThumbsUp, ExternalLink } from "lucide-react";
+import { ThumbsDown, ThumbsUp, ExternalLink, MessageSquare } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
 import { CourseSearch, Course } from "@/types";
@@ -16,6 +16,7 @@ import { SelectedCourses } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { UserFeedback } from "@/components/user-feedback";
 
 export default function RecommendationsPage() {
   const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
@@ -27,6 +28,7 @@ export default function RecommendationsPage() {
   const [skippedCourses, setSkippedCourses] = useState<Map<string, CourseSearch>>(
     new Map(),
   );
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
     const { liked, disliked, skipped } = storageController.getCoursePreferences();
@@ -57,6 +59,10 @@ export default function RecommendationsPage() {
       disliked: dislikedCourses,
       skipped: skippedCourses,
     }, recommendation, feedback);
+
+    if (storageController.getRecommendedCount() > 6) {
+      setIsFeedbackOpen(true);
+    }
 
     if (feedback === "dislike") {
       setDislikedCourses(
@@ -131,7 +137,6 @@ export default function RecommendationsPage() {
 
   return (
     <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto">
-
       <div className="flex flex-col justify-center max-w-2xl mx-auto gap-2 p-2">
         <SelectedCourses
           courses={Array.from(likedCourses.values()).reverse()}
@@ -164,6 +169,21 @@ export default function RecommendationsPage() {
           <CourseCardSkeleton />
         ) : null}
       </div>
+      <UserFeedback
+        isOpen={isFeedbackOpen}
+        onOpenChange={setIsFeedbackOpen}
+      />
+      <div className="flex justify-center my-8">
+        <Button 
+          variant="outline" 
+          onClick={() => setIsFeedbackOpen(true)}
+          className="flex items-center gap-2"
+        >
+          Give Feedback
+          <MessageSquare className="h-4 w-4" />
+        </Button>
+      </div>
+
     </main>
   );
 }
@@ -343,11 +363,11 @@ function CourseCard({
       </CardContent>
       <CardFooter className="flex justify-between">
         {!isLoading ? (
-          <>
+          <div className="grid grid-cols-3 gap-2 flex-1">
             <Button
               variant="outline"
               onClick={() => handleFeedback("dislike")}
-              className="flex-1 mr-2"
+              className="flex-1"
             >
               <ThumbsDown className="mr-2 h-4 w-4" />
               Dislike
@@ -361,12 +381,12 @@ function CourseCard({
             </Button>
             <Button
               onClick={() => handleFeedback("like")}
-              className="flex-1 ml-2"
+              className="flex-1"
             >
               <ThumbsUp className="mr-2 h-4 w-4" />
               Like
             </Button>
-          </>
+          </div>
         ) : (
           <Button variant="outline" className="w-full">
             Loading...
