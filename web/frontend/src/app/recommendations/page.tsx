@@ -45,7 +45,7 @@ export default function RecommendationsPage() {
   const handleFeedback = async (feedback: "dislike" | "neutral" | "like") => {
     if (!recommendation) return;
 
-    logFeedback({
+    void logFeedback({
       liked: likedCourses,
       disliked: dislikedCourses,
     }, recommendation, feedback === "like");

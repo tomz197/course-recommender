@@ -8,8 +8,11 @@ import RootLayout from "@/app/layout";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
 import "./index.css";
+import setPredictionModel from "./lib/set-prediction-model";
 
 const root = document.getElementById("root")!;
+
+void setPredictionModel();
 
 const router = createHashRouter(
   [

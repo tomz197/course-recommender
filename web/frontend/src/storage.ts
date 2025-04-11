@@ -37,9 +37,19 @@ function getUserID() {
   return newUserId;
 }
 
+function getPredictionModel() {
+  return localStorage.getItem('predictionModel');
+}
+
+function setPredictionModel(model: string) {
+  localStorage.setItem('predictionModel', model);
+}
+
 export const storageController = {
   getCoursePreferences,
   setCoursePreferences,
   resetCoursePreferences,
   getUserID,
+  getPredictionModel,
+  setPredictionModel,
 };

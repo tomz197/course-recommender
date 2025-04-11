@@ -9,6 +9,7 @@ export async function logFeedback(
   course: Course,
   like: boolean,
 ) {
+  const model = storageController.getPredictionModel();
   await fetch(
     import.meta.env.VITE_API_URL + "/log_feedback",
     {
@@ -21,7 +22,7 @@ export async function logFeedback(
         disliked: [...params.disliked.values()].map((course) => course.CODE),
         course: course.CODE,
         like: like,
-        model: "keywords_test", // TODO
+        model: model,
         user_id: storageController.getUserID(),
     }),
     });

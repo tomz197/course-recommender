@@ -20,15 +20,6 @@ class CourseClient:
         self.df = pd.read_parquet(os.path.join(self.data_dir, "courses.parquet"))
         self.id_df = pd.read_parquet(os.path.join(self.data_dir, "id_lookup.parquet"))
 
-        # Check for duplicate course codes
-        duplicate_codes = self.df[self.df.duplicated(subset=['CODE'], keep=False)]
-        if not duplicate_codes.empty:
-            print("Found duplicate course codes:")
-            for code, group in duplicate_codes.groupby('CODE'):
-                print(f"Code: {code} appears {len(group)} times")
-                print(group)
-                print("-" * 50)
-
         self.df.set_index('CODE', drop=False, inplace=True)
         self.id_df.set_index('ID', drop=False, inplace=True)
         
