@@ -11,13 +11,18 @@ import {
 } from "@/components/ui/dialog";
 import { Link, Outlet, useNavigate } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Check, ChevronDown, Command, Github } from "lucide-react";
+import { Github, Menu } from "lucide-react";
 import Brandmark from "@/components/brandmark";
 import { getPredictionModels, setPredictionModel } from "@/lib/set-prediction-model";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function RootLayout() {
   const navigate = useNavigate();
@@ -29,14 +34,14 @@ export default function RootLayout() {
           <Link className="cursor-pointer" to="/">
             <Brandmark className="inline-block h-8 max-w-none fill-foreground" />
           </Link>
-          <div className="flex gap-4 items-center">
+          <div className="hidden sm:flex gap-4 items-center">
             <Button
               onClick={() => {
                 navigate("/");
               }}
               variant="ghost"
             >
-              Home
+              Course search
             </Button>
             <ResetButton
               onClick={() => {
@@ -44,12 +49,43 @@ export default function RootLayout() {
                 navigate("/");
                 void (async () => {
                   await setPredictionModel(true);
-
                   window.location.reload();
                 })();
               }}
             />
             <ModeToggle />
+          </div>
+          <div className="sm:hidden">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate("/")}>
+                  Course search
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    storageController.resetCoursePreferences();
+                    navigate("/");
+                    void (async () => {
+                      await setPredictionModel(true);
+                      window.location.reload();
+                    })();
+                  }}
+                >
+                  Reset
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <div className="flex items-center justify-between">
+                    <span>Theme:</span>
+                    <ModeToggle />
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
