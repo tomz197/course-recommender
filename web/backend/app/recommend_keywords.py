@@ -6,7 +6,8 @@ from app.types import CourseWithId
 loaded_sparse_matrix = sp.load_npz("./assets/intersects_sparse.npz")
 kwd_intersects = loaded_sparse_matrix.toarray()
 
-def find_top_courses_multiple(idx_liked: List[int], idx_disliked: List[int], matrix: sp.csr_matrix, n: int) -> List[Tuple[int, float]]:
+
+def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.csr_matrix) -> List[Tuple[int, float]]:
     liked_scores = matrix[idx_liked]
     disliked_scores = matrix[idx_disliked]
 
@@ -15,7 +16,7 @@ def find_top_courses_multiple(idx_liked: List[int], idx_disliked: List[int], mat
     course_scores = [(i, score) for i, score in enumerate(summed)]
     course_scores.sort(key=lambda x: x[1], reverse=True)
 
-    return course_scores[:n]
+    return course_scores
 
 
 def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: List[str], courseClient: CourseClient, n: int) -> List[CourseWithId]:
@@ -23,7 +24,7 @@ def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: L
     disliked_ids = courseClient.get_course_ids_by_codes(disliked)
     skipped_ids = courseClient.get_course_ids_by_codes(skipped)
 
-    top_courses = find_top_courses_multiple(liked_ids, disliked_ids, kwd_intersects, n)
+    top_courses = find_top_courses(liked_ids, disliked_ids, kwd_intersects)
 
     res = []
     for idx, _ in top_courses:
@@ -32,6 +33,7 @@ def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: L
         course = courseClient.get_course_by_id(idx)
         if course is not None:
             res.append(course)
+        if len(res) == n:
+            break
 
-    print("res", res)
     return res
