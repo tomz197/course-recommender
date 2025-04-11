@@ -11,9 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Link, Outlet, useNavigate } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Github } from "lucide-react";
+import { Check, ChevronDown, Command, Github } from "lucide-react";
 import Brandmark from "@/components/brandmark";
-import setPredictionModel from "@/lib/set-prediction-model";
+import { getPredictionModels, setPredictionModel } from "@/lib/set-prediction-model";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 export default function RootLayout() {
   const navigate = useNavigate();
@@ -38,8 +42,11 @@ export default function RootLayout() {
               onClick={() => {
                 storageController.resetCoursePreferences();
                 navigate("/");
-                void setPredictionModel(true);
-                window.location.reload();
+                void (async () => {
+                  await setPredictionModel(true);
+
+                  window.location.reload();
+                })();
               }}
             />
             <ModeToggle />
@@ -54,13 +61,50 @@ export default function RootLayout() {
         <a href="https://github.com/tomz197/pv254-project" target="_blank" rel="noreferrer">
           <Button variant="outline">GitHub <Github className="h-5 w-5" /></Button>
         </a>
-        <p className="text-muted-foreground text-xs mt-2">
-          {storageController.getPredictionModel() ? "Prediction model: " + storageController.getPredictionModel() : ""}
-        </p>
+        <div className="flex justify-center">
+          <ModelSelector />
+        </div>
       </footer>
     </>
   );
 }
+
+function ModelSelector() {
+  const [selectedModel, setSelectedModel] = useState<string>(storageController.getPredictionModel() || "");
+  const [open, setOpen] = useState(false);
+
+  const modelsQuery = useQuery({
+    queryKey: ["models"],
+    queryFn: () => getPredictionModels(),
+  });
+
+  const handleModelChange = async (model: string) => {
+    setSelectedModel(model);
+    storageController.setPredictionModel(model);
+    setOpen(false);
+    window.location.reload();
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger>
+        <p className="text-muted-foreground text-xs mt-2">
+          {selectedModel ? "Prediction model: " + selectedModel : ""}
+        </p>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+        <div className="flex flex-col gap-2">
+          {modelsQuery.data?.map((model) => (
+            <Button key={model} variant="ghost" onClick={() => handleModelChange(model)}>
+              {model}
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 
 function ResetButton({
   onClick,
