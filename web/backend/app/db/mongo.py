@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 import pymongo
 from pymongo import MongoClient
 import os
@@ -82,7 +82,7 @@ class MongoDBLogger():
             logging.error(f"Failed to log feedback: {str(e)}")
             raise
 
-    def log_user_feedback(self, text: str, rating: int, faculty: str):
+    def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str]):
         """
         Log general user feedback about the system.
 

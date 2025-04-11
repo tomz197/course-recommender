@@ -62,6 +62,6 @@ class RecommendationFeedbackLog():
 
 @dataclass
 class UserFeedbackLog():
-    text: str
-    rating: int
-    faculty: str
+    text: Optional[str] = None
+    rating: Optional[int] = None
+    faculty: Optional[str] = None
