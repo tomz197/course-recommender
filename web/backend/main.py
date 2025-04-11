@@ -52,7 +52,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["embeddings_v1"]
+    return ["embeddings_v1", "keywords"]
 
 @app.get("/health")
 async def health() -> dict:
