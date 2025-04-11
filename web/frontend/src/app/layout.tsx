@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Outlet, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Github } from "lucide-react";
 import Brandmark from "@/assets/brandmark.svg";
@@ -22,9 +22,9 @@ export default function RootLayout() {
     <>
       <div className="flex flex-col justify-center min-h-screen">
         <header className="bg-primary-foreground flex justify-between text-primary-background p-4">
-          <h2 className="text-2xl font-bold cursor-pointer" onClick={() => navigate("/")}>
+          <Link className="cursor-pointer" to="/">
             <img src={Brandmark} alt="Brandmark" className="inline-block h-8 max-w-none" />
-          </h2>
+          </Link>
           <div className="flex gap-4 items-center">
             <Button
               onClick={() => {
