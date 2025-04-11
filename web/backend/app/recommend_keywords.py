@@ -17,18 +17,21 @@ def find_top_courses_multiple(idx_liked: List[int], idx_disliked: List[int], mat
 
     return course_scores[:n]
 
-def recommend_courses_keywords(liked: List[str], disliked: List[str], courseClient: CourseClient, n: int) -> List[CourseWithId]:
+
+def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: List[str], courseClient: CourseClient, n: int) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked)
+    skipped_ids = courseClient.get_course_ids_by_codes(skipped)
 
     top_courses = find_top_courses_multiple(liked_ids, disliked_ids, kwd_intersects, n)
 
     res = []
     for idx, _ in top_courses:
-        if idx in liked_ids or idx in disliked_ids:
+        if idx in liked_ids or idx in disliked_ids or idx in skipped_ids:
             continue
         course = courseClient.get_course_by_id(idx)
         if course is not None:
             res.append(course)
 
+    print("res", res)
     return res

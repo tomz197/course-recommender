@@ -19,6 +19,7 @@ const getRecommendations = async (
       body: JSON.stringify({
         liked: [...params.liked.values()].map((course) => course.CODE),
         disliked: [...params.disliked.values()].map((course) => course.CODE),
+        skipped: [...params.skipped.values()].map((course) => course.CODE),
       }),
     },
   ).then((res) => {
@@ -32,7 +33,7 @@ const getRecommendations = async (
 
 export function useRecommendCourses(params: CoursePreferences) {
   return useQuery({
-    queryKey: ["recommendations", params.liked, params.disliked],
+    queryKey: ["recommendations", params.liked, params.disliked, params.skipped],
     queryFn: () => getRecommendations(params),
     enabled: params.liked.size > 0,
     staleTime: 1000 * 60, // 1 minutes

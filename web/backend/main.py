@@ -32,13 +32,12 @@ all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeds_from_catalogue.
 db = MongoDBLogger()
 
 @app.post("/recommendations", response_model=RecommendationResponse)
-async def recommendations(liked: List[str], disliked: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
+async def recommendations(liked: List[str], disliked: List[str], skipped: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
     recommended_courses = None
-
     if model == "embeddings_v1":
-        recommended_courses = recommend_courses(liked, disliked, all_embeds, courseClient, n)
+        recommended_courses = recommend_courses(liked, disliked, skipped, all_embeds, courseClient, n)
     elif model == "keywords":
-        recommended_courses = recommend_courses_keywords(liked, disliked, courseClient, n)
+        recommended_courses = recommend_courses_keywords(liked, disliked, skipped, courseClient, n)
 
     if recommended_courses is None:
         raise ValueError("Model not found")
@@ -62,7 +61,7 @@ async def health() -> dict:
 
 @app.post("/log_recommendation_feedback")
 async def log_recommendation_feedback(log: RecommendationFeedbackLog) -> None:
-    db.log_recommendation_feedback(log.liked, log.disliked, log.course, log.like, log.user_id, log.model)
+    db.log_recommendation_feedback(log.liked, log.disliked, log.skipped, log.course, log.action, log.user_id, log.model)
 
 
 @app.post("/log_user_feedback")

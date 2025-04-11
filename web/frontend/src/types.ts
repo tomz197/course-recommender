@@ -46,9 +46,5 @@ export type CourseSearch = Pick<Course, "CODE" | "NAME" | "FACULTY">;
 export type CoursePreferences = {
   liked: Map<CourseSearch["CODE"], CourseSearch>;
   disliked: Map<CourseSearch["CODE"], CourseSearch>;
+  skipped: Map<CourseSearch["CODE"], CourseSearch>;
 };
-
-export const fullFacultyName = (faculty: string) =>
-  ({
-    FI: "Faculty of Informatics",
-  })[faculty] || faculty;

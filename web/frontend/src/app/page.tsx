@@ -25,12 +25,15 @@ export default function Home() {
   const [dislikedCourses, setDislikedCourses] = useState<
     CoursePreferences["disliked"]
   >(new Map());
+  const [skippedCourses, setSkippedCourses] = useState<CoursePreferences["skipped"]
+  >(new Map());
 
   useEffect(() => {
-    const { liked, disliked } = storageController.getCoursePreferences();
+    const { liked, disliked, skipped } = storageController.getCoursePreferences();
 
     setLikedCourses(liked);
     setDislikedCourses(disliked);
+    setSkippedCourses(skipped);
   }, []);
 
   const handleAddLikedCourse = (course: CourseSearchType) => {
@@ -41,6 +44,11 @@ export default function Home() {
   const handleAddDislikedCourse = (course: CourseSearchType) => {
     if (dislikedCourses.has(course.CODE)) return;
     setDislikedCourses(new Map(dislikedCourses.set(course.CODE, course)));
+  };
+
+  const handleAddSkippedCourse = (course: CourseSearchType) => {
+    if (skippedCourses.has(course.CODE)) return;
+    setSkippedCourses(new Map(skippedCourses.set(course.CODE, course)));
   };
 
   const handleRemoveLikedCourse = (courseId: string) => {
@@ -81,6 +89,7 @@ export default function Home() {
     storageController.setCoursePreferences({
       liked: likedCourses,
       disliked: dislikedCourses,
+      skipped: skippedCourses,
     });
     navigate("/recommendations");
   };

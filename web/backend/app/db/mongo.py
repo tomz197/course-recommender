@@ -51,13 +51,14 @@ class MongoDBLogger():
             logging.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
-    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], course: str, like: bool, user_id: str, model: str):
+    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
         """
         Log user feedback about course recommendations.
 
         Args:
             liked: List of liked recommendations
             disliked: List of disliked recommendations
+            skipped: List of skipped recommendations
             course: Course ID for which recommendations were given
             like: Overall satisfaction with recommendations
             user_id: Unique identifier of the user
@@ -68,12 +69,13 @@ class MongoDBLogger():
                 "course": course,
                 "liked_recommendations": liked,
                 "disliked_recommendations": disliked,
-                "like": like,
+                "skipped_recommendations": skipped,
+                "action": action,
                 "model": model,
                 "timestamp": datetime.now()
             }
 
-            result = self.db.feedback.insert_one(feedback_doc)
+            result = self.db.recommendation_feedback.insert_one(feedback_doc)
             logging.info(f"Feedback logged with ID: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
@@ -86,7 +88,7 @@ class MongoDBLogger():
 
         Args:
             text: Feedback text from the user
-            rating: Numerical rating (1-5) 
+            rating: Numerical rating (1-5)
             faculty: Faculty the feedback is related to
         """
         try:
@@ -107,4 +109,4 @@ class MongoDBLogger():
 
 if __name__ == "__main__":
     logger = MongoDBLogger()
-    logger.log_feedback(["CS101", "MATH101"], ["ART101"], "CS201", True, "user123", "keywords")
+    logger.log_recommendation_feedback(["CS101", "MATH101"], ["ART101"], ["CS201"], "CS201", "like", "user123", "keywords")

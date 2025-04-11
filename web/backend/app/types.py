@@ -54,8 +54,9 @@ class CourseWithId(Course):
 class RecommendationFeedbackLog():
     liked: List[str]
     disliked: List[str]
+    skipped: List[str]
     course: str
-    like: bool
+    action: str
     user_id: str
     model: str
 

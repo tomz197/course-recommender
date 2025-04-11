@@ -70,13 +70,14 @@ def sort_by_similarity(
 def recommend_courses(
         liked_codes: List[str],
         disliked_codes: List[str],
+        skipped_codes: List[str],
         all_embeds: npt.NDArray,
         courseClient: CourseClient,
         n: int
     ) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked_codes)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked_codes)
-    
+    skipped_ids = courseClient.get_course_ids_by_codes(skipped_codes)
     if not liked_ids:
         return []
 
@@ -94,7 +95,7 @@ def recommend_courses(
         if found is None:
             continue
 
-        if found.CODE not in liked_codes and found.CODE not in disliked_codes:
+        if found.CODE not in liked_codes and found.CODE not in disliked_codes and found.CODE not in skipped_codes:
             found.SIMILARITY = sim
             res.append(found)
 

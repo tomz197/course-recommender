@@ -7,7 +7,7 @@ import { storageController } from "@/storage";
 export async function logFeedback(
   params: CoursePreferences,
   course: Course,
-  like: boolean,
+  action: "like" | "dislike" | "skip",
 ) {
   const model = storageController.getPredictionModel();
   await fetch(
@@ -20,8 +20,9 @@ export async function logFeedback(
       body: JSON.stringify({
         liked: [...params.liked.values()].map((course) => course.CODE),
         disliked: [...params.disliked.values()].map((course) => course.CODE),
+        skipped: [...params.skipped.values()].map((course) => course.CODE),
         course: course.CODE,
-        like: like,
+        action: action,
         model: model,
         user_id: storageController.getUserID(),
     }),

@@ -21,15 +21,19 @@ export default function RecommendationsPage() {
   const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
     new Map(),
   );
-  const [dislikedCourses, setDislikedCourses] = useState<
-    Map<string, CourseSearch>
-  >(new Map());
+  const [dislikedCourses, setDislikedCourses] = useState<Map<string, CourseSearch>>(
+    new Map(),
+  );
+  const [skippedCourses, setSkippedCourses] = useState<Map<string, CourseSearch>>(
+    new Map(),
+  );
 
   useEffect(() => {
-    const { liked, disliked } = storageController.getCoursePreferences();
+    const { liked, disliked, skipped } = storageController.getCoursePreferences();
 
     setLikedCourses(liked);
     setDislikedCourses(disliked);
+    setSkippedCourses(skipped);
   }, []);
 
   const {
@@ -42,15 +46,17 @@ export default function RecommendationsPage() {
   } = useRecommendCourses({
     liked: likedCourses,
     disliked: dislikedCourses,
+    skipped: skippedCourses,
   });
 
-  const handleFeedback = async (feedback: "dislike" | "neutral" | "like") => {
+  const handleFeedback = async (feedback: "dislike" | "skip" | "like") => {
     if (!recommendation) return;
 
     void logFeedback({
       liked: likedCourses,
       disliked: dislikedCourses,
-    }, recommendation, feedback === "like");
+      skipped: skippedCourses,
+    }, recommendation, feedback);
 
     if (feedback === "dislike") {
       setDislikedCourses(
@@ -60,11 +66,17 @@ export default function RecommendationsPage() {
       setLikedCourses(
         new Map(likedCourses.set(recommendation.CODE, recommendation)),
       );
+    } else if (feedback === "skip") {
+      setSkippedCourses(
+        new Map(skippedCourses.set(recommendation.CODE, recommendation)),
+      );
     }
+
 
     storageController.setCoursePreferences({
       liked: likedCourses,
       disliked: dislikedCourses,
+      skipped: skippedCourses,
     });
     await refetch();
   };
@@ -207,14 +219,14 @@ function CourseCard({
   isLoading,
   recommendation,
 }: {
-  handleFeedback: (x: "like" | "dislike" | "neutral") => void;
+  handleFeedback: (x: "like" | "dislike" | "skip") => void;
   isLoading: boolean;
   recommendation: Course;
 }) {
   const [showSlowFeedback, setShowSlowFeedback] = useState(false);
   const [showVerySlowFeedback, setShowVerySlowFeedback] = useState(false);
 
-  const handleFeedback = (feedback: "like" | "dislike" | "neutral") => {
+  const handleFeedback = (feedback: "like" | "dislike" | "skip") => {
     handleFeedbackProp(feedback);
 
     setShowSlowFeedback(false);
@@ -341,7 +353,7 @@ function CourseCard({
               Dislike
             </Button>
             <Button
-              onClick={() => handleFeedback("like")}
+              onClick={() => handleFeedback("skip")}
               className="flex-1 ml-2"
               variant="outline"
             >
