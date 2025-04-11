@@ -9,16 +9,16 @@ const filterAndSort = (list: CourseSearch[], query: string): CourseSearch[] => {
   
   // Filter courses that contain the query (case-insensitive)
   const filtered = list.filter(course => 
-    course.CODE.toLowerCase().includes(queryLower) || 
-    course.NAME.toLowerCase().includes(queryLower)
+    course.CODE.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(queryLower) || 
+    course.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(queryLower)
   );
   
   // Sort the filtered list
   filtered.sort((a, b) => {
     const aCodeLower = a.CODE.toLowerCase();
     const bCodeLower = b.CODE.toLowerCase();
-    const aNameLower = a.NAME.toLowerCase();
-    const bNameLower = b.NAME.toLowerCase();
+    const aNameLower = a.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const bNameLower = b.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
     // Check for exact matches first (both in code and name)
     if (aCodeLower === queryLower && bCodeLower !== queryLower) return -1;
