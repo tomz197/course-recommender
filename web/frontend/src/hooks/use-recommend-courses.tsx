@@ -8,6 +8,9 @@ import { storageController } from "@/storage";
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
+  // WARNING: deplay for testing purposes
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
   const model = storageController.getPredictionModel();
   const res = (await fetch(
     import.meta.env.VITE_API_URL + `/recommendations?n=1&model=${model}`,

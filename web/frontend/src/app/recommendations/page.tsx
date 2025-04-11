@@ -14,6 +14,8 @@ import { storageController } from "@/storage";
 import { CourseSearch, Course } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function RecommendationsPage() {
   const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
@@ -67,28 +69,68 @@ export default function RecommendationsPage() {
     await refetch();
   };
 
+  const handleAddLikedCourse = (course: CourseSearch) => {
+    if (likedCourses.has(course.CODE)) return;
+    setLikedCourses(new Map(likedCourses.set(course.CODE, course)));
+    void refetch();
+  };
+
+  const handleAddDislikedCourse = (course: CourseSearch) => {
+    if (dislikedCourses.has(course.CODE)) return;
+    setDislikedCourses(new Map(dislikedCourses.set(course.CODE, course)));
+    void refetch();
+  };
+
+  const handleRemoveLikedCourse = (courseId: string) => {
+    const toRemove = likedCourses.get(courseId);
+    if (!toRemove) return;
+
+    likedCourses.delete(courseId);
+    setLikedCourses(new Map(likedCourses));
+    void refetch();
+
+    toast(`${courseId} removed from liked`, {
+      description: "Course removed from liked courses",
+      action: {
+        label: "Undo",
+        onClick: () => handleAddLikedCourse(toRemove),
+      }
+    }
+    );
+  };
+
+  const handleRemoveDislikedCourse = (courseId: string) => {
+    const toRemove = dislikedCourses.get(courseId);
+    if (!toRemove) return;
+
+    dislikedCourses.delete(courseId);
+    setDislikedCourses(new Map(dislikedCourses));
+    void refetch();
+
+    toast(`${courseId} removed from disliked`, {
+      description: "Course removed from disliked courses",
+      action: {
+        label: "Undo",
+        onClick: () => handleAddDislikedCourse(toRemove),
+      }
+    }
+    );
+  };
+
   return (
     <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto">
 
       <div className="flex flex-col justify-center max-w-2xl mx-auto gap-2 p-2">
         <SelectedCourses
           courses={Array.from(likedCourses.values()).reverse()}
-          onRemove={(courseId: string) => {
-            likedCourses.delete(courseId);
-            setLikedCourses(new Map(likedCourses));
-            void refetch();
-          }}
+          onRemove={handleRemoveLikedCourse}
           emptyMessage="No liked courses selected yet"
           wrap={false}
           title="Liked courses"
         />
         <SelectedCourses
           courses={Array.from(dislikedCourses.values()).reverse()}
-          onRemove={(courseId: string) => {
-            dislikedCourses.delete(courseId);
-            setDislikedCourses(new Map(dislikedCourses));
-            void refetch();
-          }}
+          onRemove={handleRemoveDislikedCourse}
           emptyMessage="No disliked courses selected yet"
           wrap={false}
           title="Disiked courses"
@@ -161,7 +203,7 @@ function ErrorCard({ error }: { error: Error }) {
 }
 
 function CourseCard({
-  handleFeedback,
+  handleFeedback: handleFeedbackProp,
   isLoading,
   recommendation,
 }: {
@@ -169,6 +211,22 @@ function CourseCard({
   isLoading: boolean;
   recommendation: Course;
 }) {
+  const [showSlowFeedback, setShowSlowFeedback] = useState(false);
+  const [showVerySlowFeedback, setShowVerySlowFeedback] = useState(false);
+
+  const handleFeedback = (feedback: "like" | "dislike" | "neutral") => {
+    handleFeedbackProp(feedback);
+
+    setShowSlowFeedback(false);
+    setShowVerySlowFeedback(false);
+    setTimeout(() => {
+      setShowSlowFeedback(true);
+    }, 3000);
+    setTimeout(() => {
+      setShowVerySlowFeedback(true);
+    }, 8000);
+  };
+
   const getFacultyColor = (faculty: string) => ({
     'FI': '#f2d45c',
     'FF': '#4bc8ff',
@@ -184,8 +242,26 @@ function CourseCard({
   })[faculty] || '#000000';
 
   return (
+    <div className="flex flex-col gap-2">
+    {showSlowFeedback && !showVerySlowFeedback && isLoading && (
+      <Alert variant="default">
+        <AlertTitle>Slow response</AlertTitle>
+        <AlertDescription>
+          The response is taking longer than expected. Please be patient.
+        </AlertDescription>
+      </Alert>
+    )}
+    {showVerySlowFeedback && isLoading && (
+      <Alert variant="default">
+        <AlertTitle>Almost there!</AlertTitle>
+        <AlertDescription>
+          Sometimes it takes a while for the first response. Other will be much faster!!!
+        </AlertDescription>
+      </Alert>
+    )}
+    
     <Card className="w-full max-w-2xl rounded-none sm:rounded-lg">
-      <CardHeader>
+      <CardHeader className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
         <CardTitle className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2">
@@ -212,7 +288,7 @@ function CourseCard({
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
         {/* Description */}
         <div>
           <h3 className="font-medium mb-1">Description</h3>
@@ -286,5 +362,6 @@ function CourseCard({
         )}
       </CardFooter>
     </Card>
+    </div>
   );
 }
