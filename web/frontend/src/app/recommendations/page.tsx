@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,32 +11,16 @@ import {
 import { ThumbsDown, ThumbsUp, ExternalLink, MessageSquare } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
-import { CourseSearch, Course } from "@/types";
+import { Course } from "@/types";
 import { SelectedCourses } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
-import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UserFeedback } from "@/components/user-feedback";
+import { useCoursePreferences } from "@/components/course-provider";
 
 export default function RecommendationsPage() {
-  const [likedCourses, setLikedCourses] = useState<Map<string, CourseSearch>>(
-    new Map(),
-  );
-  const [dislikedCourses, setDislikedCourses] = useState<Map<string, CourseSearch>>(
-    new Map(),
-  );
-  const [skippedCourses, setSkippedCourses] = useState<Map<string, CourseSearch>>(
-    new Map(),
-  );
+  const { likedCourses, dislikedCourses, skippedCourses, addLikedCourse, addDislikedCourse, addSkippedCourse, removeLikedCourse, removeDislikedCourse, removeSkippedCourse } = useCoursePreferences();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-
-  useEffect(() => {
-    const { liked, disliked, skipped } = storageController.getCoursePreferences();
-
-    setLikedCourses(liked);
-    setDislikedCourses(disliked);
-    setSkippedCourses(skipped);
-  }, []);
 
   const {
     data: recommendation,
@@ -60,79 +44,38 @@ export default function RecommendationsPage() {
       skipped: skippedCourses,
     }, recommendation, feedback);
 
-    if (storageController.getRecommendedCount() > 6) {
+    if (storageController.getRecommendedCount() == 6) {
       setIsFeedbackOpen(true);
     }
 
-    if (feedback === "dislike") {
-      setDislikedCourses(
-        new Map(dislikedCourses.set(recommendation.CODE, recommendation)),
-      );
-    } else if (feedback === "like") {
-      setLikedCourses(
-        new Map(likedCourses.set(recommendation.CODE, recommendation)),
-      );
-    } else if (feedback === "skip") {
-      setSkippedCourses(
-        new Map(skippedCourses.set(recommendation.CODE, recommendation)),
-      );
+    switch (feedback) {
+      case "dislike":
+        addDislikedCourse(recommendation);
+        break;
+      case "like":
+        addLikedCourse(recommendation);
+        break;
+      case "skip":
+        addSkippedCourse(recommendation);
+        break;
     }
 
-
-    storageController.setCoursePreferences({
-      liked: likedCourses,
-      disliked: dislikedCourses,
-      skipped: skippedCourses,
-    });
     await refetch();
   };
 
-  const handleAddLikedCourse = (course: CourseSearch) => {
-    if (likedCourses.has(course.CODE)) return;
-    setLikedCourses(new Map(likedCourses.set(course.CODE, course)));
-    void refetch();
-  };
-
-  const handleAddDislikedCourse = (course: CourseSearch) => {
-    if (dislikedCourses.has(course.CODE)) return;
-    setDislikedCourses(new Map(dislikedCourses.set(course.CODE, course)));
-    void refetch();
-  };
-
   const handleRemoveLikedCourse = (courseId: string) => {
-    const toRemove = likedCourses.get(courseId);
-    if (!toRemove) return;
-
-    likedCourses.delete(courseId);
-    setLikedCourses(new Map(likedCourses));
+    removeLikedCourse(courseId);
     void refetch();
-
-    toast(`${courseId} removed from liked`, {
-      description: "Course removed from liked courses",
-      action: {
-        label: "Undo",
-        onClick: () => handleAddLikedCourse(toRemove),
-      }
-    }
-    );
   };
 
   const handleRemoveDislikedCourse = (courseId: string) => {
-    const toRemove = dislikedCourses.get(courseId);
-    if (!toRemove) return;
-
-    dislikedCourses.delete(courseId);
-    setDislikedCourses(new Map(dislikedCourses));
+    removeDislikedCourse(courseId);
     void refetch();
+  };
 
-    toast(`${courseId} removed from disliked`, {
-      description: "Course removed from disliked courses",
-      action: {
-        label: "Undo",
-        onClick: () => handleAddDislikedCourse(toRemove),
-      }
-    }
-    );
+  const handleRemoveSkippedCourse = (courseId: string) => {
+    removeSkippedCourse(courseId);
+    void refetch();
   };
 
   return (
@@ -151,6 +94,13 @@ export default function RecommendationsPage() {
           emptyMessage="No disliked courses selected yet"
           wrap={false}
           title="Disiked courses"
+        />
+        <SelectedCourses
+          courses={Array.from(skippedCourses.values()).reverse()}
+          onRemove={handleRemoveSkippedCourse}
+          emptyMessage="No skipped courses selected yet"
+          wrap={false}
+          title="Skipped courses"
         />
       </div>
 
@@ -245,18 +195,35 @@ function CourseCard({
 }) {
   const [showSlowFeedback, setShowSlowFeedback] = useState(false);
   const [showVerySlowFeedback, setShowVerySlowFeedback] = useState(false);
+  const [slowFeedbackTimeout, setSlowFeedbackTimeout] = useState<number | null>(null);
+  const [verySlowFeedbackTimeout, setVerySlowFeedbackTimeout] = useState<number | null>(null);
 
   const handleFeedback = (feedback: "like" | "dislike" | "skip") => {
     handleFeedbackProp(feedback);
 
+    if (slowFeedbackTimeout) {
+      clearTimeout(slowFeedbackTimeout);
+      setSlowFeedbackTimeout(null);
+    }
+    
+    if (verySlowFeedbackTimeout) {
+      clearTimeout(verySlowFeedbackTimeout);
+      setVerySlowFeedbackTimeout(null);
+    }
+
     setShowSlowFeedback(false);
     setShowVerySlowFeedback(false);
-    setTimeout(() => {
+    
+    const slowTimeout = setTimeout(() => {
       setShowSlowFeedback(true);
     }, 3000);
-    setTimeout(() => {
+    
+    const verySlowTimeout = setTimeout(() => {
       setShowVerySlowFeedback(true);
     }, 8000);
+    
+    setSlowFeedbackTimeout(slowTimeout as unknown as number);
+    setVerySlowFeedbackTimeout(verySlowTimeout as unknown as number);
   };
 
   const getFacultyColor = (faculty: string) => ({

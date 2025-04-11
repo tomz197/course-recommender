@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider"
 import "./index.css";
 import { setPredictionModel } from "@/lib/set-prediction-model";
-
+import { CourseProvider } from "@/components/course-provider";
 const root = document.getElementById("root")!;
 
 void setPredictionModel();
@@ -32,8 +32,10 @@ ReactDOM.createRoot(root).render(
   <StrictMode>
     <ThemeProvider>
       <QueryProvider>
-        <RouterProvider router={router} />
-        <Toaster />
+        <CourseProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </CourseProvider>
       </QueryProvider>
     </ThemeProvider>
   </StrictMode>,

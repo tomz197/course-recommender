@@ -1,17 +1,8 @@
 import { storageController } from "@/storage";
+import api from "./utils";
 
 const getPredictionModels = async (): Promise<string[]> => {
-  const res = (await fetch(
-    import.meta.env.VITE_API_URL + "/models",
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    },
-  ).then((res) => res.json())) as string[];
-
-  return res;
+  return (await api.get("/models")) as string[];
 };
 
 const setPredictionModel = async (rewrite: boolean = false): Promise<void> => {

@@ -1,4 +1,7 @@
-from dataclasses import dataclass
+from dotenv import load_dotenv
+load_dotenv()
+import os
+
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -6,30 +9,27 @@ from typing import List
 import numpy.typing as npt
 import numpy as np
 
-from app.recommend_embeddings import recommend_courses
-from app.recommend_keywords import recommend_courses_keywords
+from app.recommend.embeddings import recommend_courses
+from app.recommend.keywords import recommend_courses_keywords
 from app.courses import CourseClient
-from app.types import CourseWithId, RecommendationFeedbackLog, UserFeedbackLog
+from app.types import CourseWithId, RecommendationFeedbackLog, UserFeedbackLog, RecommendationResponse
 from app.db.mongo import MongoDBLogger
 
-import os
-
-@dataclass
-class RecommendationResponse:
-    recommended_courses: List[CourseWithId]
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[os.getenv("FRONTEND_URL")],
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"]
 )
 
+
 courseClient = CourseClient(os.path.join("assets", "courses"))
 all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeds_from_catalogue.npy"), allow_pickle=True)
 db = MongoDBLogger()
+
 
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def recommendations(liked: List[str], disliked: List[str], skipped: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:

@@ -5,26 +5,18 @@ import type {
   Course as CourseSearch,
 } from "@/types";
 import { storageController } from "@/storage";
+import api from "@/lib/utils";
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
   storageController.incrementRecommendedCount();
   const model = storageController.getPredictionModel();
-  const res = (await fetch(
-    import.meta.env.VITE_API_URL + `/recommendations?n=1&model=${model}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        liked: [...params.liked.values()].map((course) => course.CODE),
-        disliked: [...params.disliked.values()].map((course) => course.CODE),
-        skipped: [...params.skipped.values()].map((course) => course.CODE),
-      }),
+  const res = (await api.post(`/recommendations?n=1&model=${model}`, {
+    body: {
+      liked: [...params.liked.values()].map((course) => course.CODE),
+      disliked: [...params.disliked.values()].map((course) => course.CODE),
+      skipped: [...params.skipped.values()].map((course) => course.CODE),
     },
-  ).then((res) => {
-    return res.json();
   })) as {
     recommended_courses: CourseSearch[];
   };

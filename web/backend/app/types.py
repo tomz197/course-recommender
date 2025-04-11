@@ -65,3 +65,7 @@ class UserFeedbackLog():
     text: Optional[str] = None
     rating: Optional[int] = None
     faculty: Optional[str] = None
+
+@dataclass
+class RecommendationResponse:
+    recommended_courses: List[CourseWithId]

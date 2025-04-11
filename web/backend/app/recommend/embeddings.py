@@ -77,9 +77,9 @@ def recommend_courses(
     ) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked_codes)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked_codes)
-    skipped_ids = courseClient.get_course_ids_by_codes(skipped_codes)
+
     if not liked_ids:
-        return []
+        raise ValueError("No liked courses found")
 
     liked_embeds = all_embeds[liked_ids]
     disliked_embeds = all_embeds[disliked_ids]
@@ -95,7 +95,9 @@ def recommend_courses(
         if found is None:
             continue
 
-        if found.CODE not in liked_codes and found.CODE not in disliked_codes and found.CODE not in skipped_codes:
+        if found.CODE not in liked_codes \
+            and found.CODE not in disliked_codes \
+            and found.CODE not in skipped_codes:
             found.SIMILARITY = sim
             res.append(found)
 

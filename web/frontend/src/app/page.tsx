@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,88 +8,14 @@ import {
 } from "@/components/ui/card";
 import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
-import type {
-  CoursePreferences,
-  CourseSearch as CourseSearchType,
-} from "@/types";
 import { useNavigate } from "react-router";
-import { storageController } from "@/storage";
-import { toast } from "sonner";
+import { useCoursePreferences } from "@/components/course-provider";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [likedCourses, setLikedCourses] = useState<CoursePreferences["liked"]>(
-    new Map(),
-  );
-  const [dislikedCourses, setDislikedCourses] = useState<
-    CoursePreferences["disliked"]
-  >(new Map());
-  const [skippedCourses, setSkippedCourses] = useState<CoursePreferences["skipped"]
-  >(new Map());
-
-  useEffect(() => {
-    const { liked, disliked, skipped } = storageController.getCoursePreferences();
-
-    setLikedCourses(liked);
-    setDislikedCourses(disliked);
-    setSkippedCourses(skipped);
-  }, []);
-
-  const handleAddLikedCourse = (course: CourseSearchType) => {
-    if (likedCourses.has(course.CODE)) return;
-    setLikedCourses(new Map(likedCourses.set(course.CODE, course)));
-  };
-
-  const handleAddDislikedCourse = (course: CourseSearchType) => {
-    if (dislikedCourses.has(course.CODE)) return;
-    setDislikedCourses(new Map(dislikedCourses.set(course.CODE, course)));
-  };
-
-  const handleAddSkippedCourse = (course: CourseSearchType) => {
-    if (skippedCourses.has(course.CODE)) return;
-    setSkippedCourses(new Map(skippedCourses.set(course.CODE, course)));
-  };
-
-  const handleRemoveLikedCourse = (courseId: string) => {
-    const toRemove = likedCourses.get(courseId);
-    if (!toRemove) return;
-
-    likedCourses.delete(courseId);
-    setLikedCourses(new Map(likedCourses));
-
-    toast(`${courseId} removed from liked`, {
-      description: "Course removed from liked courses",
-      action: {
-        label: "Undo",
-        onClick: () => handleAddLikedCourse(toRemove),
-      }
-    }
-    );
-  };
-
-  const handleRemoveDislikedCourse = (courseId: string) => {
-    const toRemove = dislikedCourses.get(courseId);
-    if (!toRemove) return;
-
-    dislikedCourses.delete(courseId);
-    setDislikedCourses(new Map(dislikedCourses));
-
-    toast(`${courseId} removed from disliked`, {
-      description: "Course removed from disliked courses",
-      action: {
-        label: "Undo",
-        onClick: () => handleAddDislikedCourse(toRemove),
-      }
-    }
-    );
-  };
+  const { likedCourses, dislikedCourses, addLikedCourse, addDislikedCourse, removeLikedCourse, removeDislikedCourse } = useCoursePreferences();
 
   const handleGetRecommendations = () => {
-    storageController.setCoursePreferences({
-      liked: likedCourses,
-      disliked: dislikedCourses,
-      skipped: skippedCourses,
-    });
     navigate("/recommendations");
   };
 
@@ -118,12 +43,12 @@ export default function Home() {
           <CardContent className="space-y-4 flex flex-col justify-between flex-1">
             <SelectedCourses
               courses={Array.from(likedCourses.values())}
-              onRemove={handleRemoveLikedCourse}
+              onRemove={removeLikedCourse}
               emptyMessage="No liked courses selected yet"
               title="Liked courses"
             />
             <CourseSearch
-              onSelectCourse={handleAddLikedCourse}
+              onSelectCourse={addLikedCourse}
               placeholder="Search for courses you like..."
               excludeCourses={[
                 ...likedCourses.values(),
@@ -143,12 +68,12 @@ export default function Home() {
           <CardContent className="space-y-4 flex flex-col justify-between flex-1">
             <SelectedCourses
               courses={Array.from(dislikedCourses.values())}
-              onRemove={handleRemoveDislikedCourse}
+              onRemove={removeDislikedCourse}
               emptyMessage="No disliked courses selected yet"
               title="Disliked courses"
             />
             <CourseSearch
-              onSelectCourse={handleAddDislikedCourse}
+              onSelectCourse={addDislikedCourse}
               placeholder="Search for courses you dislike..."
               excludeCourses={[
                 ...likedCourses.values(),
