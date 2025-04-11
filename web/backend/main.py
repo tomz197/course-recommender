@@ -9,7 +9,7 @@ import numpy as np
 from app.recommend_embeddings import recommend_courses
 from app.recommend_keywords import recommend_courses_keywords
 from app.courses import CourseClient
-from app.types import CourseWithId, FeedbackLog
+from app.types import CourseWithId, RecommendationFeedbackLog, UserFeedbackLog
 from app.db.mongo import MongoDBLogger
 
 import os
@@ -59,6 +59,12 @@ async def models() -> List[str]:
 async def health() -> dict:
     return {"status": "ok"}
 
-@app.post("/log_feedback")
-async def log_feedback(log: FeedbackLog) -> None:
-    db.log_feedback(log.liked, log.disliked, log.course, log.like, log.user_id, log.model)
+
+@app.post("/log_recommendation_feedback")
+async def log_recommendation_feedback(log: RecommendationFeedbackLog) -> None:
+    db.log_recommendation_feedback(log.liked, log.disliked, log.course, log.like, log.user_id, log.model)
+
+
+@app.post("/log_user_feedback")
+async def log_user_feedback(log: UserFeedbackLog) -> None:
+    db.log_user_feedback(log.text, log.rating, log.faculty)

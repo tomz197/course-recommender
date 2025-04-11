@@ -11,7 +11,7 @@ export async function logFeedback(
 ) {
   const model = storageController.getPredictionModel();
   await fetch(
-    import.meta.env.VITE_API_URL + "/log_feedback",
+    import.meta.env.VITE_API_URL + "/log_recommendation_feedback",
     {
       method: "POST",
       headers: {

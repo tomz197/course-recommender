@@ -6,29 +6,30 @@ from dotenv import load_dotenv
 import logging
 from datetime import datetime
 
+
 class MongoDBLogger():
     """MongoDB Atlas implementation of the database logger."""
-    
+
     _instance = None
     client = None
     db = None
-    
+
     def __new__(cls):
         """Singleton pattern to ensure only one database connection."""
         if cls._instance is None:
             cls._instance = super(MongoDBLogger, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
-    
+
     def __init__(self):
         """Initialize the MongoDB connection if not already initialized."""
         if self._initialized:
             return
-            
+
         load_dotenv()
         self._initialized = True
         self.init_db()
-    
+
     def init_db(self):
         """Initialize the connection to MongoDB Atlas."""
         try:
@@ -36,23 +37,24 @@ class MongoDBLogger():
             if not connection_string:
                 logging.error("MongoDB connection string not found in environment variables")
                 raise ValueError("MongoDB connection string not found")
-            
+
             self.client = MongoClient(connection_string)
             self.db = self.client.get_database("course_feedback")
-            
+
             # Create indexes for efficient queries
-            self.db.feedback.create_index([("user_id", pymongo.ASCENDING)])
-            self.db.feedback.create_index([("course", pymongo.ASCENDING)])
-            
+            self.db.recommendation_feedback.create_index([("user_id", pymongo.ASCENDING)])
+            self.db.recommendation_feedback.create_index([("course", pymongo.ASCENDING)])
+            self.db.user_feedback.create_index([("faculty", pymongo.ASCENDING)])
+
             logging.info("Successfully connected to MongoDB Atlas")
         except Exception as e:
             logging.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
-    
-    def log_feedback(self, liked: List[str], disliked: List[str], course: str, like: bool, user_id: str, model: str):
+
+    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], course: str, like: bool, user_id: str, model: str):
         """
         Log user feedback about course recommendations.
-        
+
         Args:
             liked: List of liked recommendations
             disliked: List of disliked recommendations
@@ -70,13 +72,38 @@ class MongoDBLogger():
                 "model": model,
                 "timestamp": datetime.now()
             }
-            
+
             result = self.db.feedback.insert_one(feedback_doc)
             logging.info(f"Feedback logged with ID: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
             logging.error(f"Failed to log feedback: {str(e)}")
             raise
+
+    def log_user_feedback(self, text: str, rating: int, faculty: str):
+        """
+        Log general user feedback about the system.
+
+        Args:
+            text: Feedback text from the user
+            rating: Numerical rating (1-5) 
+            faculty: Faculty the feedback is related to
+        """
+        try:
+            feedback_doc = {
+                "text": text,
+                "rating": rating,
+                "faculty": faculty,
+                "timestamp": datetime.now()
+            }
+
+            result = self.db.user_feedback.insert_one(feedback_doc)
+            logging.info(f"User feedback logged with ID: {result.inserted_id}")
+            return result.inserted_id
+        except Exception as e:
+            logging.error(f"Failed to log user feedback: {str(e)}")
+            raise
+
 
 if __name__ == "__main__":
     logger = MongoDBLogger()

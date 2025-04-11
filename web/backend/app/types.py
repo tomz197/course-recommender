@@ -51,10 +51,16 @@ class CourseWithId(Course):
     SIMILARITY: float = 0.0
 
 @dataclass
-class FeedbackLog():
+class RecommendationFeedbackLog():
     liked: List[str]
     disliked: List[str]
     course: str
     like: bool
     user_id: str
     model: str
+
+@dataclass
+class UserFeedbackLog():
+    text: str
+    rating: int
+    faculty: str
