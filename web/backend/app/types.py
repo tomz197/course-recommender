@@ -18,6 +18,7 @@ class Course:
     CODE: str
     FACULTY: str
     NAME: str
+    NAME_EN: str
     LANGUAGE: str
     SEMESTER: str
     CREDITS: str
