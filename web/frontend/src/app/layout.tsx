@@ -12,7 +12,7 @@ import {
 import { Link, Outlet, useNavigate } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Github } from "lucide-react";
-import Brandmark from "@/assets/brandmark.svg";
+import Brandmark from "@/components/brandmark";
 import setPredictionModel from "@/lib/set-prediction-model";
 
 export default function RootLayout() {
@@ -23,7 +23,7 @@ export default function RootLayout() {
       <div className="flex flex-col justify-center min-h-screen">
         <header className="bg-primary-foreground flex justify-between text-primary-background p-4">
           <Link className="cursor-pointer" to="/">
-            <img src={Brandmark} alt="Brandmark" className="inline-block h-8 max-w-none" />
+            <Brandmark className="inline-block h-8 max-w-none fill-foreground" />
           </Link>
           <div className="flex gap-4 items-center">
             <Button
@@ -54,6 +54,9 @@ export default function RootLayout() {
         <a href="https://github.com/tomz197/pv254-project" target="_blank" rel="noreferrer">
           <Button variant="outline">GitHub <Github className="h-5 w-5" /></Button>
         </a>
+        <p className="text-muted-foreground text-xs mt-2">
+          {storageController.getPredictionModel() ? "Prediction model: " + storageController.getPredictionModel() : ""}
+        </p>
       </footer>
     </>
   );

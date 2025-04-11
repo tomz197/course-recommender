@@ -4,12 +4,13 @@ import type {
   CoursePreferences,
   Course as CourseSearch,
 } from "@/types";
-
+import { storageController } from "@/storage";
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
+  const model = storageController.getPredictionModel();
   const res = (await fetch(
-    import.meta.env.VITE_API_URL + "/recommendations?n=1",
+    import.meta.env.VITE_API_URL + `/recommendations?n=1&model=${model}`,
     {
       method: "POST",
       headers: {
