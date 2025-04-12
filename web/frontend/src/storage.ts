@@ -12,9 +12,9 @@ function getCoursePreferences(): CoursePreferences {
   const parsed: StorageCoursePreferences = JSON.parse(raw);
 
   return {
-    liked: new Map(parsed.liked.map((course) => [course.CODE, course])),
-    disliked: new Map(parsed.disliked.map((course) => [course.CODE, course])),
-    skipped: new Map(parsed.skipped.map((course) => [course.CODE, course])),
+    liked: new Map((parsed.liked || []).map((course) => [course.CODE, course])),
+    disliked: new Map((parsed.disliked || []).map((course) => [course.CODE, course])),
+    skipped: new Map((parsed.skipped || []).map((course) => [course.CODE, course])),
   };
 }
 
