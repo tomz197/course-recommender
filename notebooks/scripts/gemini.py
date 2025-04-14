@@ -17,30 +17,30 @@ client = genai.Client(
 
 def main():
    input_files = [
-      #"./data/formatted/cst.json",
-      #"./data/formatted/esf.json",
-      #"./data/formatted/faf.json",
+      "./data/formatted/cst.json",
+      "./data/formatted/esf.json",
+      "./data/formatted/faf.json",
       "./data/formatted/ff.json",
-      #"./data/formatted/fi.json",
-      #"./data/formatted/fsps.json",
-      #"./data/formatted/fss.json", 
+      "./data/formatted/fi.json",
+      "./data/formatted/fsps.json",
+      "./data/formatted/fss.json", 
       "./data/formatted/lf.json",
       "./data/formatted/pdf.json",
-      #"./data/formatted/prf.json",
-      #"./data/formatted/přf.json",
+      "./data/formatted/prf.json",
+      "./data/formatted/přf.json",
    ]
    output_files= [
-      #"./data/generated/cst.json",
-      #"./data/generated/esf.json",
-      #"./data/generated/faf.json",
-      "./data/generated/ff.json", #4470/6165
-      #"./data/fi.json",
-      #"./data/generated/fsps.json",
-      #"./data/generated/fss.json", 
-      "./data/generated/lf.json", #640/2379
-      "./data/generated/pdf.json", #3780/4472
-      #"./data/generated/prf.json",
-      #"./data/generated/přf.json",
+      "./data/generated/cst.json",
+      "./data/generated/esf.json",
+      "./data/generated/faf.json",
+      "./data/generated/ff.json",
+      "./data/generated/fi.json",
+      "./data/generated/fsps.json",
+      "./data/generated/fss.json", 
+      "./data/generated/lf.json",
+      "./data/generated/pdf.json",
+      "./data/generated/prf.json",
+      "./data/generated/přf.json",
    ]
 
    for input_file, output_file in zip(input_files, output_files):

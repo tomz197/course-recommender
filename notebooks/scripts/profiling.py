@@ -6,6 +6,9 @@ import random
 from typing import List, Callable, Literal
 import numpy as np
 
+from helpers import add_backend_to_path
+add_backend_to_path()
+
 from app.recommend_embeddings import recommend_courses, sort_by_similarity
 from app.recommend_keywords import recommend_courses_keywords
 from app.courses import CourseClient

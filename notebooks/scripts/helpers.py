@@ -5,7 +5,15 @@ import unicodedata
 import numpy as np
 from tqdm import tqdm
 from nltk.stem import PorterStemmer
+import sys
 
+def add_backend_to_path():
+    # Build an absolute path from this notebook's parent directory
+    module_path = os.path.abspath(os.path.join('..', 'web', 'backend'))
+
+    # Add to sys.path if not already present
+    if module_path not in sys.path:
+        sys.path.append(module_path)
 
 def load_courses(dir_path):
     # If dir_path is a file path
