@@ -9,7 +9,7 @@ from typing import List
 import numpy.typing as npt
 import numpy as np
 
-from app.recommend.embeddings import recommend_courses
+from app.recommend.embeddings import recommend_courses, recommend_average
 from app.recommend.keywords import recommend_courses_keywords
 from app.courses import CourseClient
 from app.types import CourseWithId, RecommendationFeedbackLog, UserFeedbackLog, RecommendationResponse
@@ -36,10 +36,12 @@ db = MongoDBLogger()
 
 
 @app.post("/recommendations", response_model=RecommendationResponse)
-async def recommendations(liked: List[str], disliked: List[str], skipped: List[str], n: int, model: str = "embeddings_v1") -> RecommendationResponse:
+async def recommendations(liked: List[str], disliked: List[str], skipped: List[str], n: int, model: str = "average") -> RecommendationResponse:
     recommended_courses = None
     if model == "embeddings_v1":
         recommended_courses = recommend_courses(liked, disliked, skipped, all_embeds, courseClient, n)
+    elif model == "average":
+        recommended_courses = recommend_average(liked, disliked, skipped, all_embeds, courseClient, n)
     elif model == "keywords":
         recommended_courses = recommend_courses_keywords(liked, disliked, skipped, courseClient, n)
 
@@ -56,7 +58,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["embeddings_v1", "keywords"]
+    return ["average", "keywords"]
 
 @app.get("/health")
 async def health() -> dict:

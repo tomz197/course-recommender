@@ -102,3 +102,74 @@ def recommend_courses(
             res.append(found)
 
     return res
+
+def recommend_average(
+    liked_codes: list[str],
+    disliked_codes: list[str],
+    skipped_codes: list[str],
+    all_embeds: np.ndarray,
+    courseClient,
+    n: int = 10
+) -> list[dict]:
+    """
+    Recommends courses based on the average of liked embeddings minus the average of disliked embeddings.
+    
+    Args:
+        liked_codes: List of course codes that the user likes
+        disliked_codes: List of course codes that the user dislikes
+        skipped_codes: List of course codes to skip in recommendations
+        all_embeds: Array of all course embeddings
+        courseClient: Client for retrieving course information
+        n: Number of recommendations to return
+        
+    Returns:
+        List of recommended courses with similarity scores
+    """
+    # Get indices of liked and disliked courses
+    liked_indices = [i for i, code in enumerate(df['CODE']) if code in liked_codes]
+    disliked_indices = [i for i, code in enumerate(df['CODE']) if code in disliked_codes]
+    
+    # Skip empty sets
+    if not liked_indices:
+        logging.warning("No liked courses found in the dataset")
+        return []
+    
+    # Calculate average embeddings
+    liked_avg = np.mean(all_embeds[liked_indices], axis=0)
+    
+    # If there are disliked courses, subtract their average from the liked average
+    if disliked_indices:
+        disliked_avg = np.mean(all_embeds[disliked_indices], axis=0)
+        target_embedding = liked_avg - disliked_avg*0.5
+    else:
+        target_embedding = liked_avg
+    
+    # Calculate Euclidean distances
+    distances = np.linalg.norm(all_embeds - target_embedding, axis=1)
+    
+    # Create a list of (index, distance) tuples and sort by distance (ascending)
+    indices_with_distances = [(i, dist) for i, dist in enumerate(distances)]
+    indices_with_distances.sort(key=lambda x: x[1])
+    
+    # Filter out liked, disliked, and skipped courses
+    excluded_codes = set(liked_codes + disliked_codes + skipped_codes)
+    recommendations = []
+    
+    for i in range(len(indices_with_distances)):
+        if len(recommendations) >= n:
+            break
+            
+        idx, distance = indices_with_distances[i]
+        code = df['CODE'].iloc[idx]
+        if code in excluded_codes:
+            continue
+        course = courseClient.get_course_by_code(code)
+        if not course:
+            continue
+
+        # Convert distance to similarity (lower distance = higher similarity)
+        similarity = 1.0 / (1.0 + distance)  # Simple conversion to a 0-1 scale
+        course.SIMILARITY = similarity
+        recommendations.append(course)
+    
+    return recommendations
