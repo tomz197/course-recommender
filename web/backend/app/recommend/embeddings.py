@@ -126,12 +126,11 @@ def recommend_average(
         List of recommended courses with similarity scores
     """
     # Get indices of liked and disliked courses
-    liked_indices = [i for i, code in enumerate(df['CODE']) if code in liked_codes]
-    disliked_indices = [i for i, code in enumerate(df['CODE']) if code in disliked_codes]
+    liked_indices = courseClient.get_course_ids_by_codes(liked_codes)
+    disliked_indices = courseClient.get_course_ids_by_codes(disliked_codes)
     
     # Skip empty sets
     if not liked_indices:
-        logging.warning("No liked courses found in the dataset")
         return []
     
     # Calculate average embeddings
@@ -160,10 +159,10 @@ def recommend_average(
             break
             
         idx, distance = indices_with_distances[i]
-        code = df['CODE'].iloc[idx]
+        code = courseClient.get_course_by_id(idx).CODE
         if code in excluded_codes:
             continue
-        course = courseClient.get_course_by_code(code)
+        course = courseClient.get_course_by_id(idx)
         if not course:
             continue
 
