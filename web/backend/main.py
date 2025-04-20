@@ -31,7 +31,7 @@ app.add_middleware(
 
 
 courseClient = CourseClient(os.path.join("assets", "courses"))
-all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeds_from_catalogue.npy"), allow_pickle=True)
+all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeddings_tomas_03.npy"), allow_pickle=True)
 db = MongoDBLogger()
 
 
