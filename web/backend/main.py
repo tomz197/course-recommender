@@ -72,4 +72,4 @@ async def log_recommendation_feedback(log: RecommendationFeedbackLog) -> None:
 
 @app.post("/log_user_feedback")
 async def log_user_feedback(log: UserFeedbackLog) -> None:
-    db.log_user_feedback(log.text, log.rating, log.faculty)
+    db.log_user_feedback(log.text, log.rating, log.faculty, log.user_id)

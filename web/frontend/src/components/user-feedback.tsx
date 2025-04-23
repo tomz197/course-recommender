@@ -13,6 +13,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import { Star } from "lucide-react";
 import api from "@/lib/utils";
+import { storageController } from "@/storage";
 
 interface UserFeedbackProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
         rating: rating ?? null,
         faculty: selectedFaculty ?? null,
         text: feedback ?? null,
+        user_id: storageController.getUserID(),
       }
     });
 

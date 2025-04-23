@@ -82,7 +82,7 @@ class MongoDBLogger():
             logging.error(f"Failed to log feedback: {str(e)}")
             raise
 
-    def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str]):
+    def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str], user_id: str):
         """
         Log general user feedback about the system.
 
@@ -90,12 +90,14 @@ class MongoDBLogger():
             text: Feedback text from the user
             rating: Numerical rating (1-5)
             faculty: Faculty the feedback is related to
+            user_id: Unique identifier of the user
         """
         try:
             feedback_doc = {
                 "text": text,
                 "rating": rating,
                 "faculty": faculty,
+                "user_id": user_id,
                 "timestamp": datetime.now()
             }
 
