@@ -11,6 +11,7 @@ import numpy as np
 
 from app.recommend.embeddings import recommend_courses, recommend_average
 from app.recommend.keywords import recommend_courses_keywords
+from app.recommend.baseline import recommend_courses_baseline
 from app.courses import CourseClient
 from app.types import CourseWithId, RecommendationFeedbackLog, UserFeedbackLog, RecommendationResponse
 from app.db.mongo import MongoDBLogger
@@ -44,6 +45,8 @@ async def recommendations(liked: List[str], disliked: List[str], skipped: List[s
         recommended_courses = recommend_average(liked, disliked, skipped, all_embeds, courseClient, n)
     elif model == "keywords":
         recommended_courses = recommend_courses_keywords(liked, disliked, skipped, courseClient, n)
+    elif model == "baseline":
+        recommended_courses = recommend_courses_baseline(liked, disliked, skipped, courseClient, n)
 
     if recommended_courses is None:
         raise ValueError("Model not found")
@@ -58,7 +61,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["average", "keywords"]
+    return ["average", "keywords", "baseline", "embeddings_v1"]
 
 @app.get("/health")
 async def health() -> dict:
