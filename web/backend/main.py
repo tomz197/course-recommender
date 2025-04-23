@@ -10,7 +10,7 @@ from typing import List
 import numpy.typing as npt
 import numpy as np
 
-from app.recommend.embeddings import recommend_courses, recommend_average
+from app.recommend.embeddings import recommend_courses, recommend_average, recommend_mmr
 from app.recommend.keywords import recommend_courses_keywords
 from app.recommend.baseline import recommend_courses_baseline
 from app.recommend.tfidf import recommend_courses_keywords_tfidf
@@ -55,9 +55,9 @@ async def recommendations(
 ) -> RecommendationResponse:
     recommended_courses = None
     if model == "embeddings_v1":
-        recommended_courses = recommend_courses(
-            liked, disliked, skipped, all_embeds, courseClient, n
-        )
+        recommended_courses = recommend_courses(liked, disliked, skipped, all_embeds, courseClient, n)
+    elif model == "mmr":
+        recommended_courses = recommend_mmr(liked, disliked, skipped, all_embeds, courseClient, n, lambda_param=0.8)
     elif model == "average":
         recommended_courses = recommend_average(
             liked, disliked, skipped, all_embeds, courseClient, n
@@ -90,7 +90,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["average", "keywords", "baseline", "embeddings_v1", "keywords_tfidf"]
+    return ["average", "keywords", "baseline", "embeddings_v1", "keywords_tfidf", "mmr"]
 
 
 @app.get("/health")

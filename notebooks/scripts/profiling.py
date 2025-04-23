@@ -6,17 +6,12 @@ import random
 from typing import List, Callable, Literal
 import numpy as np
 
-from helpers import add_backend_to_path
-add_backend_to_path()
-
-from app.recommend_embeddings import recommend_courses, sort_by_similarity
-from app.recommend_keywords import recommend_courses_keywords
 from app.courses import CourseClient
 from app.types import CourseWithId
 
 # Initialize the CourseClient
 course_client = CourseClient("./assets/courses/")
-all_embeds = np.load("./assets/embeds_all.npy", allow_pickle=True)
+all_embeds = np.load("./assets/embeddings_tomas_03.npy", allow_pickle=True)
 
 def get_random_course_codes(n: int) -> List[str]:
     """Get random course codes from the course client"""
@@ -35,32 +30,27 @@ def line_profiler_analysis():
         lp = line_profiler.LineProfiler()
         
         # Import the specific functions we want to profile
-        from app.recommend_embeddings import sort_by_similarity, recommend_courses  
+        from app.recommend.embeddings import recommend_mmr
         
         # Add the functions to the profiler
-        lp.add_function(sort_by_similarity)
-        lp.add_function(recommend_courses)
+        lp.add_function(recommend_mmr)
         
         # Prepare test data
         liked_codes = get_random_course_codes(5)
         disliked_codes = get_random_course_codes(2)
         
-        # Get the IDs and embeddings
-        liked_ids = course_client.get_course_ids_by_codes(liked_codes)
-        disliked_ids = course_client.get_course_ids_by_codes(disliked_codes)
-        liked_embeds = all_embeds[liked_ids]
-        disliked_embeds = all_embeds[disliked_ids]
-        
         # Wrap the function call
-        wrapped_func = lp(recommend_courses)
+        wrapped_func = lp(recommend_mmr)
         
         # Run the wrapped function
         wrapped_func(
             liked_codes,
             disliked_codes,
+            [],
             all_embeds,
             course_client,
-            1  # Request only one recommendation
+            1,
+            0.8
         )
         
         # Print the line profiler stats
