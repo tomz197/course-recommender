@@ -52,12 +52,13 @@ async def recommendations(
     skipped: List[str],
     n: int,
     model: str = "average",
+    relevance: float = 0.8,
 ) -> RecommendationResponse:
     recommended_courses = None
     if model == "embeddings_v1":
         recommended_courses = recommend_courses(liked, disliked, skipped, all_embeds, courseClient, n)
-    elif model == "mmr":
-        recommended_courses = recommend_mmr(liked, disliked, skipped, all_embeds, courseClient, n, lambda_param=0.8)
+    elif model == "embeddings_mmr":
+        recommended_courses = recommend_mmr(liked, disliked, skipped, all_embeds, courseClient, n, lambda_param=relevance)
     elif model == "average":
         recommended_courses = recommend_average(
             liked, disliked, skipped, all_embeds, courseClient, n
@@ -90,7 +91,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["average", "keywords", "baseline", "embeddings_v1", "keywords_tfidf", "mmr"]
+    return ["baseline", "keywords_tfidf", "embeddings_mmr"]
 
 
 @app.get("/health")

@@ -50,9 +50,11 @@ export default function RecommendationsPage() {
 
     switch (feedback) {
       case "dislike":
+        storageController.incrementRelevance();
         addDislikedCourse(recommendation);
         break;
       case "like":
+        storageController.decrementRelevance();
         addLikedCourse(recommendation);
         break;
       case "skip":
@@ -332,23 +334,24 @@ function CourseCard({
         {!isLoading ? (
           <div className="grid grid-cols-3 gap-2 flex-1">
             <Button
-              variant="outline"
               onClick={() => handleFeedback("dislike")}
-              className="flex-1"
+              className="flex-1 bg-muted"
+              variant="outline"
             >
               <ThumbsDown className="mr-2 h-4 w-4" />
               Dislike
             </Button>
             <Button
               onClick={() => handleFeedback("skip")}
-              className="flex-1 ml-2"
+              className="flex-1"
               variant="outline"
             >
               Skip
             </Button>
             <Button
               onClick={() => handleFeedback("like")}
-              className="flex-1"
+              className="flex-1 bg-muted"
+              variant="outline"
             >
               <ThumbsUp className="mr-2 h-4 w-4" />
               Like

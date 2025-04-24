@@ -61,6 +61,22 @@ function incrementRecommendedCount() {
   localStorage.setItem('recommendedCount', (count + 1).toString());
 }
 
+function getRelevance(): number {
+  return parseFloat(localStorage.getItem('serendipity') || '0.8');
+}
+
+function incrementRelevance() {
+  let serendipity = getRelevance();
+  serendipity = Math.min(serendipity + 0.05, 0.95);
+  localStorage.setItem('serendipity', serendipity.toString());
+}
+
+function decrementRelevance() {
+  let serendipity = getRelevance();
+  serendipity = Math.max(serendipity - 0.05, 0.05);
+  localStorage.setItem('serendipity', serendipity.toString());
+}
+
 export const storageController = {
   getCoursePreferences,
   setCoursePreferences,
@@ -71,4 +87,7 @@ export const storageController = {
   setPredictionModel,
   getRecommendedCount,
   incrementRecommendedCount,
+  getRelevance,
+  incrementRelevance,
+  decrementRelevance,
 };

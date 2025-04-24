@@ -11,7 +11,8 @@ const getRecommendations = async (
 ): Promise<Course> => {
   storageController.incrementRecommendedCount();
   const model = storageController.getPredictionModel();
-  const res = (await api.post(`/recommendations?n=1&model=${model}`, {
+  const relevance = storageController.getRelevance();
+  const res = (await api.post(`/recommendations?n=1&model=${model}&relevance=${relevance}`, {
     body: {
       liked: [...params.liked.values()].map((course) => course.CODE),
       disliked: [...params.disliked.values()].map((course) => course.CODE),
