@@ -259,3 +259,56 @@ def recommend_mmr(
       recommendations.append(course)
 
   return recommendations
+
+def recommend_max(
+  liked_codes: list[str],
+  disliked_codes: list[str],
+  skipped_codes: list[str],
+  all_embeds: np.ndarray,
+  courseClient,
+  n: int = 10,
+) -> list[dict]:
+  """
+  Most smimilar to any of the liked based on cosine
+  """
+  excluded = set(liked_codes + disliked_codes + skipped_codes)
+
+  liked_indices = courseClient.get_course_ids_by_codes(liked_codes)
+  disliked_indices = courseClient.get_course_ids_by_codes(disliked_codes)
+  excluded_indices = courseClient.get_course_ids_by_codes(excluded)
+
+  liked_embeds = all_embeds[liked_indices]
+  disliked_embeds = all_embeds[disliked_indices]
+
+  # 1. calculate overall similarity
+  candidate_embeds_norm = all_embeds / np.linalg.norm(all_embeds, axis=1, keepdims=True)
+  liked_embeds_norm = liked_embeds / np.linalg.norm(liked_embeds, axis=1, keepdims=True)
+  # Shape: (len(candidate_idxs), len(liked_indices))
+  similarity_liked = np.dot(candidate_embeds_norm, liked_embeds_norm.T)
+
+  # 2. select best match for each course
+  best_match_liked = np.max(similarity_liked, axis=1)
+
+  # 3. filter out courses that are too similar
+  if disliked_embeds.shape[0] > 0:
+    disliked_embeds_norm = disliked_embeds / np.linalg.norm(disliked_embeds, axis=1, keepdims=True)
+    similarity_disliked = np.dot(candidate_embeds_norm, disliked_embeds_norm.T)
+    best_match_disliked = np.max(similarity_disliked, axis=1)
+
+    to_filter_idx = np.where(best_match_disliked > 0.9)[0]
+    best_match_liked[to_filter_idx] = -np.inf
+
+  # 4. get indices of top n courses
+  selected_idxs = np.argsort(-best_match_liked)[:(n + len(excluded))]
+  selected_idxs = [i for i in selected_idxs if i not in excluded_indices]
+
+  # 5. fetch the courses in the final order
+  recommendations: list[dict] = []
+  for idx in selected_idxs:
+    course = courseClient.get_course_by_id(idx)
+    if course:
+      # Optionally, attach the similarity score
+      course.SIMILARITY = float(best_match_liked[idx])
+      recommendations.append(course)
+
+  return recommendations
