@@ -5,12 +5,17 @@ import type {
   Course as CourseSearch,
 } from "@/types";
 import { storageController } from "@/storage";
+import { getRandomModel } from "@/lib/set-prediction-model";
 import api from "@/lib/utils";
 const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
   storageController.incrementRecommendedCount();
-  const model = storageController.getPredictionModel();
+  let model = storageController.getPredictionModel();
+  if (model == "random") {
+    model = await getRandomModel();
+    console.log("Random model selected:", model);
+  }
   const relevance = storageController.getRelevance();
   const res = (await api.post(`/recommendations?n=1&model=${model}&relevance=${relevance}`, {
     body: {
