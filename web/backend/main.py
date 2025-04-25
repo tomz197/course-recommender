@@ -6,10 +6,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 
-import numpy.typing as npt
 import numpy as np
 import scipy.sparse as sp
-import pickle
 from datetime import datetime
 
 from app.recommend.embeddings import recommend_courses, recommend_average, recommend_max, recommend_mmr_cos
@@ -25,6 +23,16 @@ from app.types import (
 )
 from app.db.mongo import MongoDBLogger
 from app.logger import logger
+
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+# Resource placeholders
+courseClient = None
+all_embeds = None
+kwd_intersects_gemini = None
+kwd_intersects_tfidf = None
+db = None
 
 logger.info("Starting Muni Courses API")
 server_start_time = datetime.now()
@@ -61,32 +69,50 @@ async def log_requests(request: Request, call_next):
     
     return response
 
+def load_course_client():
+    logger.info("Loading course data...")
+    cc = CourseClient(os.path.join("assets", "courses"))
+    logger.info(f"Course data loaded successfully with {len(cc.df)} courses")
+    return cc
 
-logger.info("Loading course data...")
-courseClient = CourseClient(os.path.join("assets", "courses"))
-logger.info(f"Course data loaded successfully with {len(courseClient.df)} courses")
+def load_embeddings():
+    logger.info("Loading embeddings...")
+    emb = np.load(os.path.join("assets", "embeddings_tomas_03.npy"), allow_pickle=True)
+    logger.info(f"Embeddings loaded successfully with shape {emb.shape}")
+    return emb
 
-logger.info("Loading embeddings...")
-all_embeds: npt.NDArray = np.load(os.path.join("assets", "embeddings_tomas_03.npy"), allow_pickle=True)
-logger.info(f"Embeddings loaded successfully with shape {all_embeds.shape}")
+def load_gemini_intersects():
+    logger.info("Loading Gemini keyword intersections...")
+    gi = sp.load_npz(os.path.join("assets", "intersects_sparse.npz")).toarray()
+    logger.info(f"Gemini keyword intersections loaded successfully with shape {gi.shape}")
+    return gi
 
-logger.info("Loading Gemini keyword intersections...")
-kwd_intersects_gemini = sp.load_npz(os.path.join("assets", "intersects_sparse.npz")).toarray()
-logger.info(f"Gemini keyword intersections loaded successfully with shape {kwd_intersects_gemini.shape}")
+def load_tfidf_intersects():
+    logger.info("Loading TF-IDF keyword intersections...")
+    ti = sp.load_npz(os.path.join("assets", "intersects_tfidf.npz")).toarray().astype(np.float32)
+    logger.info(f"TF-IDF keyword intersections loaded successfully with shape {ti.shape}")
+    return ti
 
-logger.info("Loading TF-IDF keyword intersections...")
-kwd_intersects_tfidf = sp.load_npz(os.path.join("assets", "intersects_tfidf.npz")).toarray().astype(np.float32)
-logger.info(f"TF-IDF keyword intersections loaded successfully with shape {kwd_intersects_tfidf.shape}")
+def init_db_logger():
+    logger.info("Initializing MongoDB logger...")
+    d = MongoDBLogger()
+    logger.info("MongoDB logger initialized successfully")
+    return d
 
-logger.info("Loading TF-IDF course indices...")
-with open(os.path.join("assets", "course_indices_tfidf.pkl"), "rb") as f:
-    course_indices_tfidf = pickle.load(f)
-logger.info(f"TF-IDF course indices loaded successfully with {len(course_indices_tfidf)} entries")
-
-logger.info("Initializing MongoDB logger...")
-db = MongoDBLogger()
-logger.info("MongoDB logger initialized successfully")
-
+@app.on_event("startup")
+async def startup_event():
+    loop = asyncio.get_event_loop()
+    with ThreadPoolExecutor() as executor:
+        results = await asyncio.gather(
+            loop.run_in_executor(executor, load_course_client),
+            loop.run_in_executor(executor, load_embeddings),
+            loop.run_in_executor(executor, load_gemini_intersects),
+            loop.run_in_executor(executor, load_tfidf_intersects),
+            loop.run_in_executor(executor, init_db_logger),
+        )
+    global courseClient, all_embeds, kwd_intersects_gemini, kwd_intersects_tfidf, db
+    courseClient, all_embeds, kwd_intersects_gemini, kwd_intersects_tfidf, db = results
+    logger.info(f"API started successfully in {datetime.now() - server_start_time}")
 
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def recommendations(
@@ -114,7 +140,7 @@ async def recommendations(
         )
     elif model == "keywords_tfidf":
         recommended_courses = recommend_courses_keywords_tfidf(
-            liked, disliked, skipped, courseClient, n, kwd_intersects_tfidf, course_indices_tfidf
+            liked, disliked, skipped, courseClient, n, kwd_intersects_tfidf
         )
     elif model == "average":
         recommended_courses = recommend_average(
@@ -160,5 +186,3 @@ async def log_recommendation_feedback(log: RecommendationFeedbackLog) -> None:
 @app.post("/log_user_feedback")
 async def log_user_feedback(log: UserFeedbackLog) -> None:
     db.log_user_feedback(log.text, log.rating, log.faculty, log.user_id)
-
-logger.info(f"API started successfully in {datetime.now() - server_start_time}")
