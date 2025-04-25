@@ -4,46 +4,51 @@ import { useQuery } from "@tanstack/react-query";
 import type { CourseSearch } from "@/types";
 const { allFacultySearch } = await import("@/lib/all_code_name_faculty");
 
-const filterAndSort = (list: CourseSearch[], query: string): CourseSearch[] => {
-  const queryLower = query.toLowerCase();
-  
-  // Filter courses that contain the query (case-insensitive)
-  const filtered = list.filter(course => 
-    course.CODE.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(queryLower) || 
-    course.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(queryLower)
-  );
-  
-  // Sort the filtered list
+// New helper for normalization
+const normalizeString = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+// Preprocess and normalize once per course
+const preprocessed = allFacultySearch.map(course => ({
+  course,
+  code: normalizeString(course.CODE),
+  name: normalizeString(course.NAME),
+}));
+
+// Refactored filterAndSort using normalized values and reduced computation
+const filterAndSort = (query: string): CourseSearch[] => {
+  const queryNorm = normalizeString(query).trim();
+  if (!queryNorm) return [];
+
+  // Filter based on normalized fields
+  const filtered = preprocessed.filter(({ code, name }) => code.includes(queryNorm) || name.includes(queryNorm));
+
+  // Sort prioritized by exact matches, match position, code matches first
   filtered.sort((a, b) => {
-    const aCodeLower = a.CODE.toLowerCase();
-    const bCodeLower = b.CODE.toLowerCase();
-    const aNameLower = a.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const bNameLower = b.NAME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const { code: aC, name: aN } = a;
+    const { code: bC, name: bN } = b;
 
-    // Check for exact matches first (both in code and name)
-    if (aCodeLower === queryLower && bCodeLower !== queryLower) return -1;
-    if (bCodeLower === queryLower && aCodeLower !== queryLower) return 1;
-    if (aNameLower === queryLower && bNameLower !== queryLower) return -1;
-    if (bNameLower === queryLower && aNameLower !== queryLower) return 1;
-    
-    // Then compare based on the index of the match (lower index means a better match)
-    const aCodeIndex = aCodeLower.indexOf(queryLower);
-    const bCodeIndex = bCodeLower.indexOf(queryLower);
-    const aNameIndex = aNameLower.indexOf(queryLower);
-    const bNameIndex = bNameLower.indexOf(queryLower);
+    // 1. Exact code match: courses whose code exactly equals the query come first
+    if (aC === queryNorm && bC !== queryNorm) return -1;
+    if (bC === queryNorm && aC !== queryNorm) return 1;
 
-    // If both have matches in code, compare code matches
-    if (aCodeIndex !== -1 && bCodeIndex !== -1) {
-      return aCodeIndex - bCodeIndex;
-    }
-    // If only one has a code match, prioritize it
-    if (aCodeIndex !== -1) return -1;
-    if (bCodeIndex !== -1) return 1;
-    // If neither has a code match, compare name matches
-    return aNameIndex - bNameIndex;
+    // 2. Exact name match: courses whose name exactly equals the query come next
+    if (aN === queryNorm && bN !== queryNorm) return -1;
+    if (bN === queryNorm && aN !== queryNorm) return 1;
+
+    // 3. Position of code match: earlier match in the code string is better
+    const aCIndex = aC.indexOf(queryNorm);
+    const bCIndex = bC.indexOf(queryNorm);
+    if (aCIndex !== -1 && bCIndex !== -1) return aCIndex - bCIndex;
+    if (aCIndex !== -1) return -1;
+    if (bCIndex !== -1) return 1;
+
+    // 4. Position of name match: earlier match in the name string is better
+    const aNIndex = aN.indexOf(queryNorm);
+    const bNIndex = bN.indexOf(queryNorm);
+    return aNIndex - bNIndex;
   });
-  
-  return filtered;
+
+  return filtered.map(({ course }) => course);
 };
 
 const searchCourses = async (
@@ -52,7 +57,7 @@ const searchCourses = async (
 ): Promise<CourseSearch[]> => {
   if (!query) return [];
 
-  const filteredAndSorted = filterAndSort(allFacultySearch, query);
+  const filteredAndSorted = filterAndSort(query);
   return filteredAndSorted.slice(0, limit);
 };
 
