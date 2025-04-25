@@ -1,3 +1,4 @@
+import random
 from typing import List, Dict, Set
 from app.courses import CourseClient
 from app.types import CourseWithId
@@ -35,23 +36,23 @@ def recommend_courses_baseline(liked: List[str], disliked: List[str], skipped: L
     for course in liked_courses:
         if course.TEACHERS:
             # Split teachers by comma and add only first 2 to set
-            course_teachers = [teacher.strip() for teacher in course.TEACHERS.split(',') if teacher.strip()]
+            course_teachers = [teacher.strip() for teacher in course.TEACHERS.split('-') if teacher.strip()]
             for teacher in course_teachers[:2]:  # Only take first 2 teachers
                 if teacher:
                     teachers_set.add(teacher)
-        
+
         if course.FACULTY:
             faculties_set.add(course.FACULTY.strip())
         
         if course.DEPARTMENT:
             departments_set.add(course.DEPARTMENT.strip())
-    
+
     # Calculate scores for all courses
     all_courses = courseClient.all_courses()
     course_scores: Dict[str, float] = {}
     
     excluded_codes = set(liked + disliked + skipped)
-    
+
     for course in all_courses:
         if course.CODE in excluded_codes:
             continue
@@ -60,7 +61,7 @@ def recommend_courses_baseline(liked: List[str], disliked: List[str], skipped: L
         
         # Check teachers (only first 2)
         if course.TEACHERS:
-            course_teachers = [teacher.strip() for teacher in course.TEACHERS.split(',') if teacher.strip()]
+            course_teachers = [teacher.strip() for teacher in course.TEACHERS.split('-') if teacher.strip()]
             course_teachers = course_teachers[:2]  # Only consider first 2 teachers
             matching_teachers = sum(1 for teacher in course_teachers if teacher in teachers_set)
             if matching_teachers > 0 and course_teachers:
@@ -80,13 +81,17 @@ def recommend_courses_baseline(liked: List[str], disliked: List[str], skipped: L
     # Sort courses by score
     sorted_codes = sorted(course_scores.keys(), key=lambda code: course_scores[code], reverse=True)
     
+    # Get all courses with the top score
+    top_courses = [code for code in sorted_codes if course_scores[code] == course_scores[sorted_codes[0]]]
+    random.shuffle(top_courses)
+    
     # Get top N courses
     recommended_courses: List[CourseWithId] = []
-    
-    for code in sorted_codes[:n]:
+
+    for code in top_courses[:n]:
         course = courseClient.get_course_by_code(code)
         if course is not None:
             course.SIMILARITY = course_scores[code]
             recommended_courses.append(course)
-    
+
     return recommended_courses
