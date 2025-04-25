@@ -161,7 +161,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["baseline", "keywords_tfidf", "keywords_gemini", "embeddings_mmr", "embeddings_max"]
+    return ["keywords_tfidf", "embeddings_mmr", "embeddings_max"]
 
 
 @app.get("/health")
