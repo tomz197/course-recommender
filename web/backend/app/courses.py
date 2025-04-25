@@ -1,5 +1,4 @@
 import os
-import json
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Optional, Any
@@ -17,12 +16,17 @@ class CourseClient:
         """
         self.data_dir: str = data_dir
 
-        self.df = pd.read_parquet(os.path.join(self.data_dir, "courses.parquet"))
-        self.id_df = pd.read_parquet(os.path.join(self.data_dir, "id_lookup.parquet"))
+        self.df = pd.read_parquet(
+            os.path.join(self.data_dir, "courses.parquet"),
+            engine="pyarrow",
+            memory_map=True,
+        )
+        self.id_df = pd.read_parquet(
+            os.path.join(self.data_dir, "id_lookup.parquet"),
+            engine="pyarrow",
+            memory_map=True,
+        )
 
-        self.df.set_index('CODE', drop=False, inplace=True)
-        self.id_df.set_index('ID', drop=False, inplace=True)
-        
     def _convert_numpy_arrays(self, course_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert any numpy arrays in the course dictionary to Python lists for serialization.

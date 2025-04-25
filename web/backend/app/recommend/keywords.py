@@ -1,4 +1,5 @@
 import scipy.sparse as sp
+import numpy as np
 from typing import List, Tuple
 from app.courses import CourseClient
 from app.types import CourseWithId
@@ -9,8 +10,8 @@ def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.c
     disliked_scores = matrix[idx_disliked]
 
     summed = liked_scores.sum(axis=0) - disliked_scores.sum(axis=0)
-
-    course_scores = [(i, score) for i, score in enumerate(summed)]
+    arr = np.asarray(summed).ravel()
+    course_scores = list(enumerate(arr))
     course_scores.sort(key=lambda x: x[1], reverse=True)
 
     return course_scores
@@ -24,8 +25,9 @@ def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: L
     top_courses = find_top_courses(liked_ids, disliked_ids, kwd_intersects)
 
     res = []
+    excluded_ids = set(liked_ids + disliked_ids + skipped_ids)
     for idx, _ in top_courses:
-        if idx in liked_ids or idx in disliked_ids or idx in skipped_ids:
+        if idx in excluded_ids:
             continue
         course = courseClient.get_course_by_id(idx)
         if course is not None:
