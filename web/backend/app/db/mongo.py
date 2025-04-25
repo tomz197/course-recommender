@@ -3,9 +3,8 @@ import pymongo
 from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
-import logging
 from datetime import datetime
-
+from app.logger import logger
 
 class MongoDBLogger():
     """MongoDB Atlas implementation of the database logger."""
@@ -35,7 +34,7 @@ class MongoDBLogger():
         try:
             connection_string = os.getenv("MONGO_CONNECTION_STRING")
             if not connection_string:
-                logging.error("MongoDB connection string not found in environment variables")
+                logger.error("MongoDB connection string not found in environment variables")
                 raise ValueError("MongoDB connection string not found")
 
             self.client = MongoClient(connection_string)
@@ -46,9 +45,9 @@ class MongoDBLogger():
             self.db.recommendation_feedback.create_index([("course", pymongo.ASCENDING)])
             self.db.user_feedback.create_index([("faculty", pymongo.ASCENDING)])
 
-            logging.info("Successfully connected to MongoDB Atlas")
+            logger.info("Successfully connected to MongoDB Atlas")
         except Exception as e:
-            logging.error(f"Failed to connect to MongoDB: {str(e)}")
+            logger.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
     def log_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
@@ -76,10 +75,10 @@ class MongoDBLogger():
             }
 
             result = self.db.recommendation_feedback.insert_one(feedback_doc)
-            logging.info(f"Feedback logged with ID: {result.inserted_id}")
+            logger.info(f"Feedback logged with ID: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
-            logging.error(f"Failed to log feedback: {str(e)}")
+            logger.error(f"Failed to log feedback: {str(e)}")
             raise
 
     def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str], user_id: str):
@@ -102,13 +101,8 @@ class MongoDBLogger():
             }
 
             result = self.db.user_feedback.insert_one(feedback_doc)
-            logging.info(f"User feedback logged with ID: {result.inserted_id}")
+            logger.info(f"User feedback logged with ID: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
-            logging.error(f"Failed to log user feedback: {str(e)}")
+            logger.error(f"Failed to log user feedback: {str(e)}")
             raise
-
-
-if __name__ == "__main__":
-    logger = MongoDBLogger()
-    logger.log_recommendation_feedback(["CS101", "MATH101"], ["ART101"], ["CS201"], "CS201", "like", "user123", "keywords")

@@ -45,7 +45,7 @@ export default function RootLayout() {
             </Button>
             <ResetButton
               onClick={() => {
-                storageController.resetCoursePreferences();
+                storageController.resetStorage();
                 navigate("/");
                 void (async () => {
                   await setPredictionModel(true);

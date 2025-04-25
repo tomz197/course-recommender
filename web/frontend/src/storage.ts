@@ -62,19 +62,23 @@ function incrementRecommendedCount() {
 }
 
 function getRelevance(): number {
-  return parseFloat(localStorage.getItem('serendipity') || '0.8');
+  return parseFloat(localStorage.getItem('relevance') || '0.7');
 }
 
 function incrementRelevance() {
-  let serendipity = getRelevance();
-  serendipity = Math.min(serendipity + 0.05, 0.95);
-  localStorage.setItem('serendipity', serendipity.toString());
+  let relevance = getRelevance();
+  relevance = Math.min(relevance + (1-relevance)*0.1, 0.99);
+  localStorage.setItem('relevance', relevance.toString());
 }
 
 function decrementRelevance() {
-  let serendipity = getRelevance();
-  serendipity = Math.max(serendipity - 0.05, 0.05);
-  localStorage.setItem('serendipity', serendipity.toString());
+  let relevance = getRelevance();
+  relevance = Math.max(relevance*0.9, 0.01);
+  localStorage.setItem('relevance', relevance.toString());
+}
+
+function resetRelevance() {
+  localStorage.setItem('relevance', '0.7');
 }
 
 export const storageController = {
@@ -90,4 +94,5 @@ export const storageController = {
   getRelevance,
   incrementRelevance,
   decrementRelevance,
+  resetRelevance,
 };

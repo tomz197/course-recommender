@@ -14,12 +14,6 @@ services:
       - HOST_HOSTNAME=localhost
       - PYTHONUNBUFFERED=1
       - DEBUG=1
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:

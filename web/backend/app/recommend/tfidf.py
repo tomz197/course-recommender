@@ -1,15 +1,13 @@
 import scipy.sparse as sp
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 from app.courses import CourseClient
 from app.types import CourseWithId
 import numpy as np
 import pickle
+import os
 
-loaded_sparse_matrix = sp.load_npz("./assets/intersects_tfidf.npz")
-kwd_intersects = loaded_sparse_matrix.toarray().astype(np.float32)
-course_indices = pickle.load(open("./assets/course_indices_tfidf.pkl", "rb"))
-
-print(kwd_intersects.shape)
+kwd_intersects = sp.load_npz(os.path.join("assets", "intersects_tfidf.npz")).toarray().astype(np.float32)
+course_indices = pickle.load(open(os.path.join("assets", "course_indices_tfidf.pkl"), "rb"))
 
 def find_top_courses(
     idx_liked: List[int], idx_disliked: List[int], matrix: np.ndarray
@@ -33,6 +31,8 @@ def recommend_courses_keywords_tfidf(
     skipped: List[str],
     courseClient: CourseClient,
     n: int,
+    kwd_intersects: np.ndarray,
+    course_indices: Dict[str, int]
 ) -> List[CourseWithId]:
     ctoi = {code: idx for idx, code in course_indices.items()}
     liked_ids = [ctoi[code] for code in liked]

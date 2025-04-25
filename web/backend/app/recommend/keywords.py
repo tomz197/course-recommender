@@ -3,9 +3,6 @@ from typing import List, Tuple
 from app.courses import CourseClient
 from app.types import CourseWithId
 
-loaded_sparse_matrix = sp.load_npz("./assets/intersects_sparse.npz")
-kwd_intersects = loaded_sparse_matrix.toarray()
-
 
 def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.csr_matrix) -> List[Tuple[int, float]]:
     liked_scores = matrix[idx_liked]
@@ -19,7 +16,7 @@ def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.c
     return course_scores
 
 
-def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: List[str], courseClient: CourseClient, n: int) -> List[CourseWithId]:
+def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: List[str], courseClient: CourseClient, n: int, kwd_intersects: sp.csr_matrix) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked)
     skipped_ids = courseClient.get_course_ids_by_codes(skipped)
