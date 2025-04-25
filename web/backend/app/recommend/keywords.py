@@ -6,14 +6,37 @@ from app.types import CourseWithId
 
 
 def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.csr_matrix) -> List[Tuple[int, float]]:
+    # If we have no liked courses, we can't make recommendations
+    if not idx_liked:
+        return []
+    
+    # Extract rows from the similarity matrix for liked courses
     liked_scores = matrix[idx_liked]
-    disliked_scores = matrix[idx_disliked]
-
-    summed = liked_scores.sum(axis=0) - disliked_scores.sum(axis=0)
+    
+    # Calculate the base score by summing all liked course similarities
+    summed = liked_scores.sum(axis=0)
+    
+    # Apply penalty for disliked courses if any exist
+    if idx_disliked:
+        # Extract rows from the similarity matrix for disliked courses
+        disliked_scores = matrix[idx_disliked]
+        
+        # Instead of direct subtraction, apply a weighted penalty
+        # This prevents disliked courses from having too much influence
+        # We scale down the disliked penalty to avoid over-penalization
+        disliked_penalty = disliked_scores.sum(axis=0) * (0.5 / max(len(idx_disliked), 1))
+        summed = summed - disliked_penalty
+    
+    # Convert sparse matrix to dense numpy array and flatten to 1D
     arr = np.asarray(summed).ravel()
+    
+    # Create list of (course_index, score) tuples
     course_scores = list(enumerate(arr))
+    
+    # Sort courses by score in descending order (highest similarity first)
     course_scores.sort(key=lambda x: x[1], reverse=True)
 
+    # Return sorted list of (course_index, score) tuples
     return course_scores
 
 
