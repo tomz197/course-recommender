@@ -27,6 +27,9 @@ class CourseClient:
             memory_map=True,
         )
 
+        self.df.set_index('CODE', drop=False, inplace=True)
+        self.id_df.set_index('ID', drop=False, inplace=True)
+
     def _convert_numpy_arrays(self, course_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Convert any numpy arrays in the course dictionary to Python lists for serialization.
