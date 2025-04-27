@@ -50,18 +50,7 @@ class MongoDBLogger():
             logger.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
-    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
-        """
-        Log user feedback about course recommendations.
-
-        Args:
-            liked: List of liked recommendations
-            disliked: List of disliked recommendations
-            skipped: List of skipped recommendations
-            course: Course ID for which recommendations were given
-            like: Overall satisfaction with recommendations
-            user_id: Unique identifier of the user
-        """
+    def log_recommendation_feedbacks(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str, collection):
         try:
             feedback_doc = {
                 "user_id": user_id,
@@ -74,12 +63,40 @@ class MongoDBLogger():
                 "timestamp": datetime.now()
             }
 
-            result = self.db.recommendation_feedback.insert_one(feedback_doc)
+            result = collection.insert_one(feedback_doc)
             logger.info(f"Feedback logged with ID: {result.inserted_id}")
             return result.inserted_id
         except Exception as e:
             logger.error(f"Failed to log feedback: {str(e)}")
             raise
+    
+    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
+        """
+        Log user feedback about course recommendations.
+
+        Args:
+            liked: List of liked recommendations
+            disliked: List of disliked recommendations
+            skipped: List of skipped recommendations
+            course: Course ID for which recommendations were given
+            like: Overall satisfaction with recommendations
+            user_id: Unique identifier of the user
+        """
+        return self.log_recommendation_feedbacks(liked, disliked, skipped, course, action, user_id, model, self.db.recommendation_feedback)
+    
+    def log_bot_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
+        """
+        Log bot feedback about course recommendations.
+
+        Args:
+            liked: List of liked recommendations
+            disliked: List of disliked recommendations
+            skipped: List of skipped recommendations
+            course: Course ID for which recommendations were given
+            like: Overall satisfaction with recommendations
+            user_id: Unique identifier of the user
+        """
+        return self.log_recommendation_feedbacks(liked, disliked, skipped, course, action, user_id, model, self.db.bot_recommendation_feedback)
 
     def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str], user_id: str):
         """

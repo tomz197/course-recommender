@@ -68,27 +68,29 @@ async def log_requests(request: Request, call_next):
     
     return response
 
+
+assets = "assets"
 def load_course_client():
     logger.info("Loading course data...")
-    cc = CourseClient(os.path.join("assets", "courses"))
+    cc = CourseClient(os.path.join(assets, "courses"))
     logger.info(f"Course data loaded successfully with {len(cc.df)} courses")
     return cc
 
 def load_embeddings():
     logger.info("Loading embeddings...")
-    emb = np.load(os.path.join("assets", "embeddings_tomas_03.npy"), allow_pickle=True, mmap_mode="r")
+    emb = np.load(os.path.join(assets, "embeddings_tomas_03.npy"), allow_pickle=True, mmap_mode="r")
     logger.info(f"Embeddings loaded successfully with shape {emb.shape}")
     return emb
 
 def load_gemini_intersects():
     logger.info("Loading Gemini keyword intersections...")
-    gi = sp.load_npz(os.path.join("assets", "intersects_sparse.npz"))
+    gi = sp.load_npz(os.path.join(assets, "intersects_sparse.npz"))
     logger.info(f"Gemini keyword intersections loaded successfully with shape {gi.shape}")
     return gi
 
 def load_tfidf_intersects():
     logger.info("Loading TF-IDF keyword intersections...")
-    ti = sp.load_npz(os.path.join("assets", "intersects_tfidf.npz"))
+    ti = sp.load_npz(os.path.join(assets, "intersects_tfidf.npz"))
     logger.info(f"TF-IDF keyword intersections loaded successfully with shape {ti.shape}")
     return ti
 
@@ -99,7 +101,9 @@ def init_db_logger():
     return d
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event(assets_path: str = assets):
+    global assets
+    assets = assets_path
     loop = asyncio.get_event_loop()
     with ThreadPoolExecutor() as executor:
         results = await asyncio.gather(
