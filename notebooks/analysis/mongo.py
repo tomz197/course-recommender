@@ -49,12 +49,23 @@ class MongoDBReader():
             logging.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
-    def get_recommendation_feedbacks(self):
+    def get_user_recommendation_feedbacks(self):
         """
         Get user feedback about course recommendations.
         """
         try:
-            result = self.db.recommendation_feedback.find()
+            result = self.db.user_recommendation_feedback.find()
+            return result
+        except Exception as e:
+            logging.error(f"Failed to get recommendation feedbacks: {str(e)}")
+            raise
+    
+    def get_bot_recommendation_feedbacks(self):
+        """
+        Get bot feedback about course recommendations.
+        """
+        try:
+            result = self.db.bot_recommendation_feedback.find()
             return result
         except Exception as e:
             logging.error(f"Failed to get recommendation feedbacks: {str(e)}")
@@ -74,5 +85,5 @@ class MongoDBReader():
 
 if __name__ == "__main__":
     logger = MongoDBReader()
-    print(logger.get_recommendation_feedbacks())
+    print(logger.get_user_recommendation_feedbacks())
     print(logger.get_user_feedbacks())
