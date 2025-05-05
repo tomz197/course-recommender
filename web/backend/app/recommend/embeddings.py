@@ -475,7 +475,10 @@ def recommend_max_with_combinations(
       best_match_target1, best_match_target2 = target_embeds_index_to_pair[best_match_target_idx]
       best_match_course1 = courseClient.get_course_by_id(liked_indices[best_match_target1])
       best_match_course2 = courseClient.get_course_by_id(liked_indices[best_match_target2])
-      course.RECOMMENDED_FROM = [best_match_course1.CODE, best_match_course2.CODE]
+      if best_match_course1.CODE == best_match_course2.CODE:
+        course.RECOMMENDED_FROM = [best_match_course1.CODE]
+      else:
+         course.RECOMMENDED_FROM = [best_match_course1.CODE, best_match_course2.CODE]
       recommendations.append(course)
 
   return recommendations
