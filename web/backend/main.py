@@ -179,17 +179,9 @@ async def health() -> dict:
 
 @app.post("/log_recommendation_feedback")
 async def log_recommendation_feedback(log: RecommendationFeedbackLog) -> None:
-    db.log_recommendation_feedback(
-        log.liked,
-        log.disliked,
-        log.skipped,
-        log.course,
-        log.action,
-        log.user_id,
-        log.model,
-    )
+    db.log_recommendation_feedback(log)
 
 
 @app.post("/log_user_feedback")
 async def log_user_feedback(log: UserFeedbackLog) -> None:
-    db.log_user_feedback(log.text, log.rating, log.faculty, log.user_id)
+    db.log_user_feedback(log)

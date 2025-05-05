@@ -19,6 +19,7 @@ export async function logFeedback(
         action: action,
         model: storageController.getPredictionModel(),
         user_id: storageController.getUserID(),
+        recommended_from: course.RECOMMENDED_FROM,
     },
   });
 };

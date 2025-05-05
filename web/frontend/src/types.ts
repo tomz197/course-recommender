@@ -39,6 +39,7 @@ export type Course = {
   KEYWORDS: string[];
   DESCRIPTION: string;
   RATINGS: CourseRatings;
+  RECOMMENDED_FROM: string[] | null;
 };
 
 export type CourseSearch = Pick<Course, "CODE" | "NAME" | "FACULTY">;

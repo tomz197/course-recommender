@@ -60,6 +60,8 @@ class RecommendationFeedbackLog():
     action: str
     user_id: str
     model: str
+    phrases: List[str] = None
+    recommended_from: List[str] = None
 
 @dataclass
 class UserFeedbackLog():

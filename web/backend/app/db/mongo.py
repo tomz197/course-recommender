@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 from app.logger import logger
+from app.types import RecommendationFeedbackLog, UserFeedbackLog
 
 class MongoDBLogger():
     """MongoDB Atlas implementation of the database logger."""
@@ -50,16 +51,17 @@ class MongoDBLogger():
             logger.error(f"Failed to connect to MongoDB: {str(e)}")
             raise
 
-    def log_recommendation_feedbacks(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str, collection):
+    def log_recommendation_feedbacks(self, log: RecommendationFeedbackLog, collection):
         try:
             feedback_doc = {
-                "user_id": user_id,
-                "course": course,
-                "liked_recommendations": liked,
-                "disliked_recommendations": disliked,
-                "skipped_recommendations": skipped,
-                "action": action,
-                "model": model,
+                "user_id": log.user_id,
+                "course": log.course,
+                "liked_recommendations": log.liked,
+                "disliked_recommendations": log.disliked,
+                "skipped_recommendations": log.skipped,
+                "action": log.action,
+                "model": log.model,
+                "recommended_from": log.recommended_from,
                 "timestamp": datetime.now()
             }
 
@@ -70,7 +72,7 @@ class MongoDBLogger():
             logger.error(f"Failed to log feedback: {str(e)}")
             raise
     
-    def log_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
+    def log_recommendation_feedback(self, log: RecommendationFeedbackLog):
         """
         Log user feedback about course recommendations.
 
@@ -82,9 +84,9 @@ class MongoDBLogger():
             like: Overall satisfaction with recommendations
             user_id: Unique identifier of the user
         """
-        return self.log_recommendation_feedbacks(liked, disliked, skipped, course, action, user_id, model, self.db.recommendation_feedback)
+        return self.log_recommendation_feedbacks(log, self.db.recommendation_feedback)
     
-    def log_bot_recommendation_feedback(self, liked: List[str], disliked: List[str], skipped: List[str], course: str, action: str, user_id: str, model: str):
+    def log_bot_recommendation_feedback(self, log: RecommendationFeedbackLog):
         """
         Log bot feedback about course recommendations.
 
@@ -96,9 +98,9 @@ class MongoDBLogger():
             like: Overall satisfaction with recommendations
             user_id: Unique identifier of the user
         """
-        return self.log_recommendation_feedbacks(liked, disliked, skipped, course, action, user_id, model, self.db.bot_recommendation_feedback)
+        return self.log_recommendation_feedbacks(log, self.db.bot_recommendation_feedback)
 
-    def log_user_feedback(self, text: Optional[str], rating: Optional[int], faculty: Optional[str], user_id: str):
+    def log_user_feedback(self, log: UserFeedbackLog):
         """
         Log general user feedback about the system.
 
@@ -110,10 +112,11 @@ class MongoDBLogger():
         """
         try:
             feedback_doc = {
-                "text": text,
-                "rating": rating,
-                "faculty": faculty,
-                "user_id": user_id,
+                "text": log.text,
+                "rating": log.rating,
+                "faculty": log.faculty,
+                "user_id": log.user_id,
+                "phrases": log.phrases,
                 "timestamp": datetime.now()
             }
 

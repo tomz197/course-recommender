@@ -12,7 +12,7 @@ import { ThumbsDown, ThumbsUp, ExternalLink, MessageSquare } from "lucide-react"
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
 import { Course } from "@/types";
-import { SelectedCourses } from "@/components/selected-courses";
+import { CourseBadge, SelectedCourses } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UserFeedback } from "@/components/user-feedback";
@@ -121,6 +121,21 @@ export default function RecommendationsPage() {
           <CourseCardSkeleton />
         ) : null}
       </div>
+      {recommendation?.RECOMMENDED_FROM && recommendation.RECOMMENDED_FROM.length > 0 && (
+        <div className="flex flex-row items-center max-w-2xl mx-auto p-2">
+          <p className="text-sm text-muted-foreground">
+            Because you liked:
+          </p>
+            <span className="ml-1 flex flex-wrap gap-2">
+              {recommendation.RECOMMENDED_FROM.map((course) => {
+                const found = likedCourses.get(course) || dislikedCourses.get(course) || skippedCourses.get(course);
+                if (!found) return null;
+                return <CourseBadge key={found.CODE} course={found} showCode={false} showName={true} />;
+              })}
+            </span>
+        </div>
+      )}
+
       <UserFeedback
         isOpen={isFeedbackOpen}
         onOpenChange={setIsFeedbackOpen}

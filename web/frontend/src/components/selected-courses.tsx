@@ -41,8 +41,8 @@ export function SelectedCourses({
         <p className="text-sm">{title}</p>
         <ShowDetails courses={courses} onRemove={onRemove} title={title} />
       </div>
-      <div className="overflow-scroll py-1 max-h-32">
-        <div className={`flex ${wrap ? "flex-wrap" : ""} gap-2 mb-2`}>
+      <div className={`overflow-scroll py-1 max-h-32 ${wrap ? "overflow-y-auto overflow-x-hidden" : "overflow-y-hidden overflow-x-auto"}`}>
+        <div className={`flex ${wrap ? "flex-wrap" : "overflow-y-none"} gap-2 mb-2`}>
           {courses.map((course) => (
             <CourseBadge key={course.CODE} course={course} onRemove={onRemove} />
           ))}
@@ -52,12 +52,16 @@ export function SelectedCourses({
   );
 }
 
-function CourseBadge({
+export function CourseBadge({
   course,
   onRemove,
+  showCode = true,
+  showName = false,
 }: {
   course: CourseSearch;
-  onRemove: SelectedCoursesProps["onRemove"];
+  onRemove?: SelectedCoursesProps["onRemove"];
+  showCode?: boolean;
+  showName?: boolean;
 }) {
   return (
     <Dialog>
@@ -66,15 +70,22 @@ function CourseBadge({
           variant="secondary"
           className="pl-2 pr-1 py-1 flex items-center gap-1 cursor-pointer hover:shadow-md"
         >
-          <span className="mr-1">{course.CODE}</span>
-          <button
-            type="button"
-            onClick={() => onRemove(course.CODE)}
+          {showCode && (
+            <span className="mr-1">{course.CODE}</span>
+          )}
+          {showName && (
+            <span className="mr-1">{course.NAME}</span>
+          )}
+          {onRemove && (
+            <button
+              type="button"
+              onClick={() => onRemove(course.CODE)}
             className="rounded-full p-0.5 cursor-pointer hover:bg-muted-foreground hover:text-muted"
             aria-label={`Remove ${course.NAME}`}
           >
-            <X className="h-3 w-3" />
-          </button>
+              <X className="h-3 w-3" />
+            </button>
+          )}
         </Badge>
       </DialogTrigger>
       <DialogContent>

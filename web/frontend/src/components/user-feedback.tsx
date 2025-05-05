@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -14,6 +14,27 @@ import { Textarea } from "./ui/textarea";
 import { Star } from "lucide-react";
 import api from "@/lib/utils";
 import { storageController } from "@/storage";
+import { ScrollArea } from "./ui/scroll-area";
+
+const FEEDBACK_PHRASES = [
+  "Spot-on",
+  "Highly relevant",
+  "Good surprises",
+  "Interesting options",
+  "Helpful start",
+  "Good fit",
+  "Great!",
+  "Mixed relevance",
+  "Just okay",
+  "Some useful",
+  "Hit or miss",
+  "Not relevant",
+  "Mostly irrelevant",
+  "Poor fit",
+  "Obvious choices",
+  "Not helpful",
+  "Confusing"
+];
 
 interface UserFeedbackProps {
   isOpen: boolean;
@@ -35,57 +56,75 @@ const FACULTIES = [
   { code: 'PřF', name: 'Faculty of Science', color: '#00af3f' }
 ] as const;
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
-  const [rating, setRating] = useState<number | undefined>(undefined);
   const [feedback, setFeedback] = useState("");
   const [selectedFaculty, setSelectedFaculty] = useState<string>("");
+  const [selectedPhrases, setSelectedPhrases] = useState<string[]>([]);
+  const [shuffledPhrases, setShuffledPhrases] = useState<string[]>([]);
+  const [showAllPhrases, setShowAllPhrases] = useState(false);
+
+  useEffect(() => {
+    setShuffledPhrases(shuffleArray(FEEDBACK_PHRASES));
+  }, []);
+
+  const displayedPhrases = showAllPhrases ? shuffledPhrases : shuffledPhrases.slice(0, 6);
+
+  const handlePhraseClick = (phrase: string) => {
+    setSelectedPhrases(prev => {
+      const newSelection = prev.includes(phrase)
+        ? prev.filter(p => p !== phrase)
+        : [...prev, phrase];
+      
+      // Show all phrases if there's at least one selection
+      if (newSelection.length > 0) {
+        setShowAllPhrases(true);
+      }
+      
+      return newSelection;
+    });
+  };
 
   const handleSubmit = async () => {
     await api.post("/log_user_feedback", {
       body: {
-        rating: rating ?? null,
         faculty: selectedFaculty ?? null,
         text: feedback ?? null,
+        phrases: selectedPhrases,
         user_id: storageController.getUserID(),
       }
     });
 
     onOpenChange(false);
-    setRating(undefined);
     setFeedback("");
     setSelectedFaculty("");
+    setSelectedPhrases([]);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] px-0">
+        <ScrollArea className="max-h-[80vh] px-4">
         <DialogHeader>
-          <DialogTitle>How are you enjoying the recommendations?</DialogTitle>
+          <DialogTitle>How are you enjoying the recommendation algorithm?</DialogTitle>
           <DialogDescription>
             Your feedback helps us improve the experience for everyone.
+            <br />
+            You are rating the overall experience of the recommendation algorithm, not the individual courses.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <label className="text-sm font-medium">Satisfaction Rating</label>
-            <div className="flex justify-center items-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="focus:outline-none"
-                >
-                  <Star
-                    className={`h-8 w-8 ${
-                      star <= (rating ?? 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Faculty</label>
+            <label className="text-sm font-medium">Your faculty</label>
             <div className="flex flex-wrap gap-2">
               {FACULTIES.map((faculty) => (
                 <button
@@ -94,7 +133,7 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
                   className={`px-4 py-1 flex-1 rounded-full text-sm font-medium transition-colors ${
                     selectedFaculty === faculty.code
                       ? "text-white"
-                      : "text-gray-700 hover:bg-gray-100"
+                      : "hover:bg-gray-100"
                   }`}
                   style={{
                     backgroundColor: selectedFaculty === faculty.code ? faculty.color : "transparent",
@@ -107,6 +146,32 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
             </div>
           </div>
           <div className="grid gap-2">
+            <label className="text-sm font-medium">How do you feel about the recommendations?</label>
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {displayedPhrases.map((phrase) => (
+                <button
+                  key={phrase}
+                  onClick={() => handlePhraseClick(phrase)}
+                  className={`px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
+                    selectedPhrases.includes(phrase)
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  }`}
+                >
+                  {phrase}
+                </button>
+              ))}
+            </div>
+            {shuffledPhrases.length > 6 && (
+              <button
+                onClick={() => setShowAllPhrases(!showAllPhrases)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors mt-1"
+              >
+                {showAllPhrases ? "Show less" : "Show more"}
+              </button>
+            )}
+          </div>
+          <div className="grid gap-2">
             <label className="text-sm font-medium">Additional Feedback</label>
             <Textarea
               placeholder="Tell us more about your experience..."
@@ -117,12 +182,12 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
           </div>
         </div>
         <DialogFooter className="gap-2 grid grid-cols-1 sm:grid-cols-2">
-          
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Skip
           </Button>
-          <Button onClick={handleSubmit}>Submit Feedback</Button>
-        </DialogFooter>
+            <Button onClick={handleSubmit}>Submit Feedback</Button>
+          </DialogFooter>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

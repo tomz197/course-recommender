@@ -41,7 +41,7 @@ export default function RootLayout() {
               }}
               variant="ghost"
             >
-              Course search
+              Home
             </Button>
             <ResetButton
               onClick={() => {
