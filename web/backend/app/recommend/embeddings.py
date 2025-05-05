@@ -400,3 +400,183 @@ def recommend_mmr_cos(
       recommendations.append(course)
 
   return recommendations
+
+def recommend_max_with_combinations(
+  liked_codes: list[str],
+  disliked_codes: list[str],
+  skipped_codes: list[str],
+  all_embeds: np.ndarray,
+  courseClient,
+  n: int = 10,
+) -> list[dict]:
+  """
+  Most smimilar to any pair of liked based on cosine
+  """
+  excluded = set(liked_codes + disliked_codes + skipped_codes)
+
+  liked_indices = courseClient.get_course_ids_by_codes(liked_codes)
+  disliked_indices = courseClient.get_course_ids_by_codes(disliked_codes)
+  excluded_indices = courseClient.get_course_ids_by_codes(excluded)
+
+  liked_embeds = all_embeds[liked_indices]
+  disliked_embeds = all_embeds[disliked_indices]
+
+  # The average of each pair of liked embeddings
+  targed_embeds = np.array([
+    np.mean(liked_embeds[[i, j]], axis=0)
+    for i in range(len(liked_embeds))
+    for j in range(len(liked_embeds))
+  ])
+
+  # 1. calculate overall similarity
+  candidate_embeds_norm = all_embeds / np.linalg.norm(all_embeds, axis=1, keepdims=True)
+  target_embeds_norm = targed_embeds / np.linalg.norm(targed_embeds, axis=1, keepdims=True)
+  # Shape: (len(candidate_idxs), len(targed_embeds))
+  similarity_target = np.dot(candidate_embeds_norm, target_embeds_norm.T)
+
+  # 2. select best match for each course and note to which target it macthed best
+  best_match_target_score = np.max(similarity_target, axis=1)
+  best_match_target = np.argmax(similarity_target, axis=1)
+
+  # Calculate similarity to original liked courses for filtering
+  liked_embeds_norm = liked_embeds / np.linalg.norm(liked_embeds, axis=1, keepdims=True)
+  similarity_liked = np.dot(candidate_embeds_norm, liked_embeds_norm.T)
+  best_match_liked = np.max(similarity_liked, axis=1)
+
+  # Filter out courses that are too similar to liked ones
+  to_filter_idx = np.where(best_match_liked > 0.97)[0]
+  best_match_target_score[to_filter_idx] = -np.inf
+
+  # 3. filter out courses that are too similar to disliked ones
+  if disliked_embeds.shape[0] > 0:
+    disliked_embeds_norm = disliked_embeds / np.linalg.norm(disliked_embeds, axis=1, keepdims=True)
+    similarity_disliked = np.dot(candidate_embeds_norm, disliked_embeds_norm.T)
+    best_match_disliked = np.max(similarity_disliked, axis=1)
+
+    to_filter_idx = np.where(best_match_disliked > 0.9)[0]
+    best_match_target_score[to_filter_idx] = -np.inf
+
+  # 4. get indices of top n courses
+  selected_idxs = np.argsort(-best_match_target_score)[:(n + len(excluded))]
+  selected_idxs = [i for i in selected_idxs if i not in excluded_indices]
+
+  # 5. fetch the courses in the final order
+  recommendations: list[dict] = []
+  for idx in selected_idxs:
+    course = courseClient.get_course_by_id(idx)
+    if course:
+      # Optionally, attach the similarity score
+      # course.SIMILARITY = float(best_match_liked[idx])
+      best_match_target_idx = best_match_target[idx]
+      best_match_target1, best_match_target2 = np.unravel_index(best_match_target_idx, (len(liked_embeds), len(liked_embeds)))
+      best_match_course1 = courseClient.get_course_by_id(liked_indices[best_match_target1])
+      best_match_course2 = courseClient.get_course_by_id(liked_indices[best_match_target2])
+      course.RECOMMENDED_FROM = [best_match_course1.CODE, best_match_course2.CODE]
+      recommendations.append(course)
+
+  return recommendations
+
+def recommend_max_with_combinations_with_mmr(
+  liked_codes: list[str],
+  disliked_codes: list[str],
+  skipped_codes: list[str],
+  all_embeds: np.ndarray,
+  courseClient,
+  n: int = 10,
+  lambda_param: float = 0.7
+) -> list[dict]:
+  """
+  Most smimilar to any pair of liked based on cosine with MMR
+  """
+  excluded = set(liked_codes + disliked_codes + skipped_codes)
+
+  liked_indices = courseClient.get_course_ids_by_codes(liked_codes)
+  disliked_indices = courseClient.get_course_ids_by_codes(disliked_codes)
+  excluded_indices = courseClient.get_course_ids_by_codes(excluded)
+  
+  liked_embeds = all_embeds[liked_indices]
+  orig_liked_embeds = all_embeds[liked_indices]
+  disliked_embeds = all_embeds[disliked_indices]
+
+  # The average of each pair of liked embeddings
+  liked_embeds = np.array([
+    np.mean(liked_embeds[[i, j]], axis=0)
+    for i in range(len(liked_embeds))
+    for j in range(i, len(liked_embeds))
+  ])
+
+  # 1. calculate overall similarity
+  candidate_embeds_norm = all_embeds / np.linalg.norm(all_embeds, axis=1, keepdims=True)
+  liked_embeds_norm = liked_embeds / np.linalg.norm(liked_embeds, axis=1, keepdims=True)
+  original_liked_embeds_norm = orig_liked_embeds / np.linalg.norm(orig_liked_embeds, axis=1, keepdims=True)
+  # Shape: (len(candidate_idxs), len(liked_indices))
+  similarity_liked = np.dot(candidate_embeds_norm, liked_embeds_norm.T)
+
+  # 2. select best match for each course
+  best_match_liked = np.max(similarity_liked, axis=1)
+
+  # 3. filter out courses that are too similar
+  if disliked_embeds.shape[0] > 0:
+    disliked_embeds_norm = disliked_embeds / np.linalg.norm(disliked_embeds, axis=1, keepdims=True)
+    similarity_disliked = np.dot(candidate_embeds_norm, disliked_embeds_norm.T)
+    best_match_disliked = np.max(similarity_disliked, axis=1)
+
+    to_filter_idx = np.where(best_match_disliked > 0.9)[0]
+    best_match_liked[to_filter_idx] = -np.inf
+
+  excluded = set(liked_codes + disliked_codes + skipped_codes)
+  excluded_idxs = courseClient.get_course_ids_by_codes(excluded)
+
+  candidate_idxs = [
+    i for i in np.argsort(-best_match_liked)
+  ][:(max(n, 500) + len(excluded))]
+
+  candidate_idxs = [
+    c for c in candidate_idxs
+    if c not in excluded_idxs
+  ]
+
+  # 3) MMR re‐ranking loop
+  selected_idxs: list[int] = []
+  while len(selected_idxs) < n and candidate_idxs:
+    current_candidate_embeds = all_embeds[candidate_idxs]
+
+    # 1) Relevance term (vectorized)
+    rel_vector = best_match_liked[candidate_idxs]
+
+    # 2) Diversity term (vectorized)
+    # Normalize for cosine similarity
+    current_candidate_embeds_norm = current_candidate_embeds / np.linalg.norm(current_candidate_embeds, axis=1, keepdims=True)
+    
+    # Calculate cosine similarities between each candidate and all liked embeddings
+    # Shape: (len(candidate_idxs), len(liked_indices))
+    similarities_cl = np.dot(current_candidate_embeds_norm, original_liked_embeds_norm.T)
+    
+    # Calculate diversity for each candidate (max similarity to any liked item)
+    # Shape: (len(candidate_idxs),)
+    div_vector = np.max(similarities_cl, axis=1)
+
+    # 3) Calculate MMR scores (vectorized)
+    mmr_scores_vector = lambda_param * rel_vector - (1 - lambda_param) * div_vector
+
+    # 4) Find the index *within candidate_idxs* corresponding to the max score
+    max_score_local_idx = np.argmax(mmr_scores_vector)
+
+    # 5) Get the actual course index (ID) with the highest score
+    next_idx = candidate_idxs[max_score_local_idx]
+
+    # 6) Add the best candidate to selected list and remove from candidates
+    selected_idxs.append(next_idx)
+    candidate_idxs.pop(max_score_local_idx) # More efficient than remove() when we have the index
+
+
+  # 4) fetch the courses in the final order
+  recommendations: list[dict] = []
+  for idx in selected_idxs:
+    course = courseClient.get_course_by_id(idx)
+    if course:
+      # Store the cosine similarity directly
+      # course.SIMILARITY = float(sim_to_target[idx])
+      recommendations.append(course)
+
+  return recommendations

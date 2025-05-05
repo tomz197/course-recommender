@@ -10,7 +10,7 @@ import numpy as np
 import scipy.sparse as sp
 from datetime import datetime
 
-from app.recommend.embeddings import recommend_courses, recommend_average, recommend_max, recommend_mmr_cos
+from app.recommend.embeddings import recommend_courses, recommend_average, recommend_max, recommend_mmr_cos, recommend_max_with_combinations
 from app.recommend.keywords import recommend_courses_keywords
 from app.recommend.baseline import recommend_courses_baseline
 from app.courses import CourseClient
@@ -149,6 +149,10 @@ async def recommendations(
         recommended_courses = recommend_average(
             liked, disliked, skipped, all_embeds, courseClient, n
         )
+    elif model == "max_with_combinations":
+        recommended_courses = recommend_max_with_combinations(
+            liked, disliked, skipped, all_embeds, courseClient, n
+        )
 
     if recommended_courses is None:
         raise ValueError("Model not found")
@@ -165,7 +169,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["keywords_tfidf", "embeddings_mmr", "embeddings_max", "baseline"]
+    return ["max_with_combinations", "keywords_tfidf", "embeddings_mmr", "embeddings_max", "baseline"]
 
 
 @app.get("/health")

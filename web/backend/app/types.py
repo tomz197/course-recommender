@@ -49,6 +49,7 @@ class Course:
 class CourseWithId(Course):
     ID: Optional[int] = 0
     SIMILARITY: float = 0.0
+    RECOMMENDED_FROM: List[str] = None
 
 @dataclass
 class RecommendationFeedbackLog():
