@@ -40,6 +40,25 @@ def find_top_courses(idx_liked: List[int], idx_disliked: List[int], matrix: sp.c
     return course_scores
 
 
+def calculate_recommended_from(recommended: int, idx_liked: List[int], idx_disliked: List[int], matrix: sp.csr_matrix, courseClient: CourseClient) -> List[str]:
+    # Return list of 2 liked courses' ids that have the largest intersection with the recommendation
+    if not idx_liked:
+        return []
+    
+    # Extract the similarity scores between the recommended course and all liked courses
+    similarities = []
+    for liked_idx in idx_liked:
+        # Get similarity score between recommended course and this liked course
+        score = matrix[liked_idx, recommended].item()
+        similarities.append((liked_idx, score))
+    
+    # Sort by similarity score in descending order
+    similarities.sort(key=lambda x: x[1], reverse=True)
+    
+    # The IDs of up to 2 most similar liked courses
+    return [courseClient.get_course_by_id(idx).CODE for idx, _ in similarities[:2]]
+
+
 def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: List[str], courseClient: CourseClient, n: int, kwd_intersects: sp.csr_matrix) -> List[CourseWithId]:
     liked_ids = courseClient.get_course_ids_by_codes(liked)
     disliked_ids = courseClient.get_course_ids_by_codes(disliked)
@@ -53,6 +72,7 @@ def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: L
         if idx in excluded_ids:
             continue
         course = courseClient.get_course_by_id(idx)
+        course.RECOMMENDED_FROM = calculate_recommended_from(idx, liked_ids, disliked_ids, kwd_intersects, courseClient)
         if course is not None:
             res.append(course)
         if len(res) == n:
