@@ -81,14 +81,25 @@ def recommend_courses_baseline(liked: List[str], disliked: List[str], skipped: L
     # Sort courses by score
     sorted_codes = sorted(course_scores.keys(), key=lambda code: course_scores[code], reverse=True)
     
-    # Get all courses with the top score
-    top_courses = [code for code in sorted_codes if course_scores[code] == course_scores[sorted_codes[0]]]
-    random.shuffle(top_courses)
+    # Group courses by score
+    courses_grouped_by_score: Dict[float, List[str]] = {}
+    for code in sorted_codes:
+        score = course_scores[code]
+        courses_grouped_by_score.setdefault(score, []).append(code)
+
+    # Shuffle within each score group and reconstruct the list
+    final_sorted_codes = []
+    # Iterate through scores in descending order (implicit from sorted_codes_by_score)
+    unique_scores_desc = sorted(courses_grouped_by_score.keys(), reverse=True)
+    for score in unique_scores_desc:
+        codes_with_same_score = courses_grouped_by_score[score]
+        random.shuffle(codes_with_same_score)
+        final_sorted_codes.extend(codes_with_same_score)
     
     # Get top N courses
     recommended_courses: List[CourseWithId] = []
 
-    for code in top_courses[:n]:
+    for code in final_sorted_codes[:n]:
         course = courseClient.get_course_by_code(code)
         if course is not None:
             course.SIMILARITY = course_scores[code]
