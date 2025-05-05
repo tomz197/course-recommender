@@ -425,8 +425,12 @@ def recommend_max_with_combinations(
   targed_embeds = np.array([
     np.mean(liked_embeds[[i, j]], axis=0)
     for i in range(len(liked_embeds))
-    for j in range(len(liked_embeds))
+    for j in range(i, len(liked_embeds))
   ])
+
+  target_embeds_index_to_pair = [
+    (i, j) for i in range(len(liked_embeds)) for j in range(i, len(liked_embeds))
+  ]
 
   # 1. calculate overall similarity
   candidate_embeds_norm = all_embeds / np.linalg.norm(all_embeds, axis=1, keepdims=True)
@@ -468,7 +472,7 @@ def recommend_max_with_combinations(
       # Optionally, attach the similarity score
       # course.SIMILARITY = float(best_match_liked[idx])
       best_match_target_idx = best_match_target[idx]
-      best_match_target1, best_match_target2 = np.unravel_index(best_match_target_idx, (len(liked_embeds), len(liked_embeds)))
+      best_match_target1, best_match_target2 = target_embeds_index_to_pair[best_match_target_idx]
       best_match_course1 = courseClient.get_course_by_id(liked_indices[best_match_target1])
       best_match_course2 = courseClient.get_course_by_id(liked_indices[best_match_target2])
       course.RECOMMENDED_FROM = [best_match_course1.CODE, best_match_course2.CODE]
