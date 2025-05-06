@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
-import { Star } from "lucide-react";
 import api from "@/lib/utils";
 import { storageController } from "@/storage";
 import { ScrollArea } from "./ui/scroll-area";

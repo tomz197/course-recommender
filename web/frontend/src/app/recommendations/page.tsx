@@ -287,9 +287,7 @@ function CourseCard({
                 {recommendation.FACULTY}
               </span>
               <div className="flex items-center gap-2 mb-0.5 text-sm text-muted-foreground flex-wrap">
-                <span>{recommendation.SEMESTER}</span>
-                <span>•</span>
-                <span>{recommendation.LANGUAGE}</span>
+                <span>{recommendation.SEMESTER.split(" ")[0]}</span>
                 {recommendation.CREDITS && (
                   <>
                     <span>•</span>

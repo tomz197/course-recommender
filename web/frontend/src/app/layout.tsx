@@ -43,6 +43,14 @@ export default function RootLayout() {
             >
               Home
             </Button>
+            <Button
+              onClick={() => {
+                navigate("/visualization");
+              }}
+              variant="ghost"
+            >
+              Visualization
+            </Button>
             <ResetButton
               onClick={() => {
                 storageController.resetStorage();
