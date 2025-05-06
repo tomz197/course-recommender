@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import { Data, Layout, Config } from 'plotly.js';
 import type { DataPoint } from '@/assets/tsne_visualization_data';
-import { ExternalLink } from 'lucide-react';
+import { AlertCircle, ExternalLink, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const { tsne_data } = await import('@/assets/tsne_visualization_data');
 
@@ -49,9 +50,10 @@ export default function VisualizationPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('All');
   const [selectedPoint, setSelectedPoint] = useState<DataPoint | null>(null);
+  const [showDescription, setShowDescription] = useState(true);
 
   // Memoize filtered data
-  const [filteredData, filteredCodes] = useMemo(() => {
+  const filteredCodes = useMemo(() => {
     const filteredData = tsne_data.filter(d => {
       const matchesSearch = !searchTerm || 
         d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,7 +67,7 @@ export default function VisualizationPage() {
 
     const filteredCodes = new Set(filteredData.map(d => `${d.faculty}-${d.code}`));
 
-    return [filteredData, filteredCodes];
+    return filteredCodes;
   }, [searchTerm, selectedFaculty]);
 
   // Memoize traces
@@ -146,11 +148,44 @@ export default function VisualizationPage() {
   }), []);
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-4">Course Visualization</h1>
-      
+    <div className="container mx-auto py-6 grid grid-cols-1 gap-4">
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Course Visualization</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-lg font-semibold">About this Visualization</h2>
+          <button 
+            onClick={() => setShowDescription(!showDescription)}
+            className="text-sm text-muted-foreground"
+          >
+            {showDescription ? 'Show less' : 'Show more'}
+          </button>
+        </div>
+        {showDescription && (
+          <>
+            <p className="mb-2">
+              Each point represents a course, with the <strong>size</strong> indicating the number of students 
+              enrolled and the <strong>color</strong> representing the faculty. Courses that appear closer together 
+              in this visualization have similar content based on their course descriptions.
+            </p>
+            <p>
+              The dimensions themselves are abstract, but the spatial relationships are meaningful - 
+              courses clustered together are more similar to each other. This can help you discover 
+              related courses across different faculties or identify unique interdisciplinary offerings.
+            </p>
+          </>
+        )}
+      </div>
+
+      <Alert variant="destructive" className='md:hidden'>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Small screen detected</AlertTitle>
+        <AlertDescription>
+            This visualization is not optimized for small screens. Please use a larger device for the best experience.
+        </AlertDescription>
+      </Alert>
+
       {/* Filters */}
-      <div className="mb-4 flex gap-4">
+      <div className="flex gap-4">
         <Input
           type="text"
           placeholder="Search by course name, code, or faculty..."
@@ -174,14 +209,17 @@ export default function VisualizationPage() {
       {/* Visualization container */}
       <div className="relative border rounded-lg overflow-hidden">
         <Plot
-          data={traces}
+          data={traces as Data[]}
           layout={layout}
           config={config}
           className="w-full h-[800px] max-h-[80vh]"
           onClick={(event: Plotly.PlotMouseEvent) => {
             if (event.points && event.points[0]) {
-              const point = filteredData[event.points[0].pointIndex];
-              setSelectedPoint(point);
+              const traceIndex = event.points[0].curveNumber;
+              const pointIndex = event.points[0].pointIndex;
+              const faculty = faculties[traceIndex + 1]; // +1 because 'All' is at index 0
+              const facultyData = tsne_data.filter((d: DataPoint) => d.faculty === faculty);
+              setSelectedPoint(facultyData[pointIndex]);
             }
           }}
         />
@@ -196,7 +234,16 @@ export default function VisualizationPage() {
               maxWidth: '300px',
             }}
           >
-            <h3 className="font-bold text-sm">{selectedPoint.name}</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-sm">{selectedPoint.name}</h3>
+              <button 
+                onClick={() => setSelectedPoint(null)} 
+                className="ml-2 p-1 rounded-full hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
             <p className="text-sm">Code: {selectedPoint.code}</p>
             <p className="text-sm">Faculty: {selectedPoint.faculty}</p>
             <p className="text-sm">Students: {selectedPoint.studentCount}</p>
@@ -215,7 +262,7 @@ export default function VisualizationPage() {
       </div>
 
       {/* Instructions */}
-      <div className="mt-4 text-sm text-gray-600">
+      <div className="text-sm text-gray-600">
         <p>• Use mouse wheel to zoom in/out</p>
         <p>• Click and drag to pan</p>
         <p>• Click on points to see details</p>
