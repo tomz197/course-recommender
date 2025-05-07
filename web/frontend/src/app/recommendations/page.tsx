@@ -88,20 +88,20 @@ export default function RecommendationsPage() {
         <CourseDialogModal
           courses={Array.from(likedCourses.values()).reverse()}
           onRemove={handleRemoveLikedCourse}
-          title="Liked courses"
-          triggerText="Liked courses"
+          title={`Liked courses (${likedCourses.size})`}
+          triggerText={`Liked courses (${likedCourses.size})`}
         />
         <CourseDialogModal
           courses={Array.from(dislikedCourses.values()).reverse()}
           onRemove={handleRemoveDislikedCourse}
-          title="Disiked courses"
-          triggerText="Disiked courses"
+          title={`Disiked courses (${dislikedCourses.size})`}
+          triggerText={`Disiked courses (${dislikedCourses.size})`}
         />
         <CourseDialogModal
           courses={Array.from(skippedCourses.values()).reverse()}
           onRemove={handleRemoveSkippedCourse}
-          title="Skipped courses"
-          triggerText="Skipped courses"
+          title={`Skipped courses (${skippedCourses.size})`}
+          triggerText={`Skipped courses (${skippedCourses.size})`}
         />
       </div>
 
@@ -338,7 +338,7 @@ function CourseCard({
           <div className="grid grid-cols-3 gap-2 flex-1">
             <Button
               onClick={() => handleFeedback("dislike")}
-              className="flex-1 bg-muted"
+              className="flex-1 bg-muted hover:bg-red-100 transition-colors duration-150"
               variant="outline"
             >
               <ThumbsDown className="mr-2 h-4 w-4" />
@@ -346,14 +346,14 @@ function CourseCard({
             </Button>
             <Button
               onClick={() => handleFeedback("skip")}
-              className="flex-1"
+              className="flex-1 hover:bg-gray-50 transition-colors duration-150"
               variant="outline"
             >
               Skip
             </Button>
             <Button
               onClick={() => handleFeedback("like")}
-              className="flex-1 bg-muted"
+              className="flex-1 bg-muted hover:bg-green-100 transition-colors duration-150"
               variant="outline"
             >
               <ThumbsUp className="mr-2 h-4 w-4" />

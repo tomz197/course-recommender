@@ -34,7 +34,7 @@ export default function RootLayout() {
           <Link className="cursor-pointer" to="/">
             <Brandmark className="inline-block h-8 max-w-none fill-foreground" />
           </Link>
-          <div className="hidden sm:flex gap-4 items-center">
+          <div className="hidden sm:flex gap-2 items-center">
             <Button
               onClick={() => {
                 navigate("/");
@@ -120,11 +120,13 @@ function ModelSelector() {
   const modelsQuery = useQuery({
     queryKey: ["models"],
     queryFn: () => getPredictionModels(),
+    staleTime: Infinity,
   });
 
   const handleModelChange = async (model: string) => {
     setSelectedModel(model);
     storageController.setPredictionModel(model);
+    storageController.resetRelevance();
     setOpen(false);
     window.location.reload();
   };
@@ -133,7 +135,7 @@ function ModelSelector() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
         <p className="text-muted-foreground text-xs mt-2">
-          {selectedModel ? "Prediction model: " + selectedModel : ""}
+          {selectedModel ? "Prediction model: " + selectedModel : "Select model"}
         </p>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">

@@ -14,6 +14,13 @@ const preprocessed = allFacultySearch.map(course => ({
   name: normalizeString(course.NAME),
 }));
 
+export const filterCourses = (query: string): CourseSearch[] => {
+  const queryNorm = normalizeString(query).trim();
+  if (!queryNorm) return allFacultySearch;
+
+  return preprocessed.filter(({ code, name }) => code.includes(queryNorm) || name.includes(queryNorm)).map(({ course }) => course);
+}
+
 // Refactored filterAndSort using normalized values and reduced computation
 const filterAndSort = (query: string): CourseSearch[] => {
   const queryNorm = normalizeString(query).trim();

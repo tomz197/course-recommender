@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Plot from 'react-plotly.js';
 import { Data, Layout, Config } from 'plotly.js';
 import type { DataPoint } from '@/assets/tsne_visualization_data';
-import { AlertCircle, ExternalLink, X } from 'lucide-react';
+import { AlertCircle, ExternalLink, Maximize2, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/select"
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { filterCourses } from '@/hooks/use-search-courses';
 
 const { tsne_data } = await import('@/assets/tsne_visualization_data');
 
@@ -47,25 +49,79 @@ const faculties = [
 ];
 
 export default function VisualizationPage() {
+  const [showDescription, setShowDescription] = useState(true);
+
+  return (
+    <div className="container mx-auto py-6 flex flex-col gap-4">
+      <Alert variant="destructive" className='md:hidden'>
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Small screen detected</AlertTitle>
+        <AlertDescription>
+            This visualization is not optimized for small screens. Please use a larger device for the best experience.
+        </AlertDescription>
+      </Alert>
+
+      <div>
+        <h1 className="text-2xl font-bold mb-4">Course Visualization</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <h2 className="text-lg font-semibold">About this Visualization</h2>
+          <button 
+            onClick={() => setShowDescription(!showDescription)}
+            className="text-sm text-muted-foreground"
+          >
+            {showDescription ? 'Show less' : 'Show more'}
+          </button>
+        </div>
+        {showDescription && (
+          <>
+            <p className="mb-2">
+              Each point represents a course, with the <strong>size</strong> indicating the number of students 
+              enrolled and the <strong>color</strong> representing the faculty. Courses that appear closer together 
+              in this visualization have similar content based on their course descriptions.
+            </p>
+            <p>
+              The dimensions themselves are abstract, but the spatial relationships are meaningful - 
+              courses clustered together are more similar to each other. This can help you discover 
+              related courses across different faculties or identify unique interdisciplinary offerings.
+            </p>
+          </>
+        )}
+      </div>
+
+      <CourseVisualization />
+
+      {/* Instructions */}
+      <div className="text-sm text-muted-foreground">
+        <p>• Use mouse wheel  to zoom in/out</p>
+        <p>• Click and drag or touch and drag to pan</p>
+        <p>• Double tap to reset zoom</p>
+        <p>• Click on points to see details</p>
+        <p>• Use the search box to filter courses</p>
+        <p>• Use the dropdown to filter by faculty</p>
+        <p>• Click on legend items to toggle faculty visibility</p>
+      </div>
+    </div>
+  );
+} 
+
+function CourseVisualization() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('All');
   const [selectedPoint, setSelectedPoint] = useState<DataPoint | null>(null);
-  const [showDescription, setShowDescription] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Memoize filtered data
   const filteredCodes = useMemo(() => {
-    const filteredData = tsne_data.filter(d => {
-      const matchesSearch = !searchTerm || 
-        d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        d.faculty.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesFaculty = selectedFaculty === 'All' || d.faculty === selectedFaculty;
-      
-      return matchesSearch && matchesFaculty;
-    });
+    if (searchTerm === '' && selectedFaculty === 'All') {
+      return new Set();
+    }
+    let filteredData = filterCourses(searchTerm);
 
-    const filteredCodes = new Set(filteredData.map(d => `${d.faculty}-${d.code}`));
+    if (selectedFaculty !== 'All') {
+      filteredData = filteredData.filter(d => d.FACULTY === selectedFaculty);
+    }
+
+    const filteredCodes = new Set(filteredData.map(d => `${d.FACULTY}-${d.CODE}`));
 
     return filteredCodes;
   }, [searchTerm, selectedFaculty]);
@@ -76,6 +132,26 @@ export default function VisualizationPage() {
       .filter(f => f !== 'All')
       .map(faculty => {
         const facultyData = tsne_data.filter((d: DataPoint) => d.faculty === faculty);
+        const opacity = (() => {
+          if (filteredCodes.size <= 0 && selectedFaculty === 'All') {
+            return new Array(facultyData.length).fill(0.5);
+          }
+
+          return facultyData.map((d: DataPoint) => {
+            return filteredCodes.has(`${d.faculty}-${d.code}`) ? 0.75 : 0.05;
+          })
+        })();
+
+        const lineColor = (() => {
+          if (filteredCodes.size <= 0 && selectedFaculty === 'All') {
+            return undefined;
+          }
+
+          return facultyData.map((d: DataPoint) => {
+            return filteredCodes.has(`${d.faculty}-${d.code}`) ? '#000000' : '#ffffff';
+          })
+        })();
+
         return {
           x: facultyData.map((d: DataPoint) => d.x),
           y: facultyData.map((d: DataPoint) => d.y),
@@ -83,16 +159,11 @@ export default function VisualizationPage() {
           type: 'scattergl' as const,
           name: faculty,
           marker: {
-            size: facultyData.map((d: DataPoint) => Math.max(2, Math.sqrt(Math.min(500, Math.max(0, d.studentCount))))),
+            size: facultyData.map((d: DataPoint) => Math.max(3, Math.sqrt(Math.min(500, Math.max(0, d.studentCount))))),
             color: getFacultyColor(faculty),
-            opacity: filteredCodes.size < tsne_data.length
-            ? facultyData.map((d: DataPoint) => {
-              return filteredCodes.has(`${d.faculty}-${d.code}`) ? 0.75 : 0.1;
-            }) : new Array(facultyData.length).fill(0.5),
+            opacity: opacity,
             line: {
-              color: filteredCodes.size < tsne_data.length
-              ? facultyData.map((d: DataPoint) => filteredCodes.has(`${d.faculty}-${d.code}`) ? '#000000' : '#ffffff')
-              : undefined,
+              color: lineColor,
               width: 0.5
             }
           },
@@ -129,12 +200,14 @@ export default function VisualizationPage() {
     xaxis: {
       title: '',
       showgrid: true,
-      zeroline: false
+      zeroline: false,
+      showticklabels: false
     },
     yaxis: {
       title: '',
       showgrid: true,
-      zeroline: false
+      zeroline: false,
+      showticklabels: false
     }
   }), []);
 
@@ -144,51 +217,18 @@ export default function VisualizationPage() {
     scrollZoom: true,
     displayModeBar: true,
     modeBarButtonsToAdd: ['zoom2d', 'pan2d', 'resetScale2d'] as const,
-    modeBarButtonsToRemove: ['lasso2d', 'select2d'] as const
+    modeBarButtonsToRemove: ['lasso2d', 'select2d'] as const,
+    touchZoom: true,
+    doubleClick: 'reset+autosize'
   }), []);
 
   return (
-    <div className="container mx-auto py-6 grid grid-cols-1 gap-4">
-      <div>
-        <h1 className="text-2xl font-bold mb-4">Course Visualization</h1>
-        <div className="flex items-center gap-2 mb-2">
-          <h2 className="text-lg font-semibold">About this Visualization</h2>
-          <button 
-            onClick={() => setShowDescription(!showDescription)}
-            className="text-sm text-muted-foreground"
-          >
-            {showDescription ? 'Show less' : 'Show more'}
-          </button>
-        </div>
-        {showDescription && (
-          <>
-            <p className="mb-2">
-              Each point represents a course, with the <strong>size</strong> indicating the number of students 
-              enrolled and the <strong>color</strong> representing the faculty. Courses that appear closer together 
-              in this visualization have similar content based on their course descriptions.
-            </p>
-            <p>
-              The dimensions themselves are abstract, but the spatial relationships are meaningful - 
-              courses clustered together are more similar to each other. This can help you discover 
-              related courses across different faculties or identify unique interdisciplinary offerings.
-            </p>
-          </>
-        )}
-      </div>
-
-      <Alert variant="destructive" className='md:hidden'>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Small screen detected</AlertTitle>
-        <AlertDescription>
-            This visualization is not optimized for small screens. Please use a larger device for the best experience.
-        </AlertDescription>
-      </Alert>
-
+    <div className={`flex flex-1 flex-col gap-4 ${isFullscreen ? 'absolute inset-0 z-50 bg-background p-4' : ''}`}>
       {/* Filters */}
       <div className="flex gap-4">
         <Input
           type="text"
-          placeholder="Search by course name, code, or faculty..."
+          placeholder="Search by course name or code ..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -199,20 +239,27 @@ export default function VisualizationPage() {
           <SelectContent>
             {faculties.map((faculty) => (
               <SelectItem key={faculty} value={faculty}>
-                {faculty}
+                {faculty === 'All' ? 'All faculties' : faculty}
               </SelectItem>
             ))}
         </SelectContent>
         </Select>
+        <Button
+          onClick={() => setIsFullscreen(!isFullscreen)}
+          size="icon"
+        >
+          {isFullscreen ? <X className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+        </Button>
       </div>
 
       {/* Visualization container */}
-      <div className="relative border rounded-lg overflow-hidden">
+      <div className={`relative border rounded-lg overflow-hidden p-2 flex flex-1 min-h-[600px]`}>
         <Plot
           data={traces as Data[]}
           layout={layout}
           config={config}
-          className="w-full h-[800px] max-h-[80vh]"
+          className={`w-full h-full ${isFullscreen ? 'flex-1' : 'max-h-[80vh]'}`}
+          key={`plot-${isFullscreen}`}
           onClick={(event: Plotly.PlotMouseEvent) => {
             if (event.points && event.points[0]) {
               const traceIndex = event.points[0].curveNumber;
@@ -260,16 +307,6 @@ export default function VisualizationPage() {
           </div>
         )}
       </div>
-
-      {/* Instructions */}
-      <div className="text-sm text-gray-600">
-        <p>• Use mouse wheel to zoom in/out</p>
-        <p>• Click and drag to pan</p>
-        <p>• Click on points to see details</p>
-        <p>• Use the search box to filter courses</p>
-        <p>• Use the dropdown to filter by faculty</p>
-        <p>• Click on legend items to toggle faculty visibility</p>
-      </div>
     </div>
-  );
-} 
+  )
+}

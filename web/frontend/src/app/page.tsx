@@ -10,7 +10,7 @@ import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
 import { useNavigate } from "react-router";
 import { useCoursePreferences } from "@/components/course-provider";
-import { Heart, ThumbsDown, Sparkles } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -22,7 +22,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+    <main className="min-h-screen">
       <div className="container mx-auto px-1 sm:px-4 py-4 sm:p-8 md:py-12">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -45,10 +45,10 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="h-full border-2 border-primary/10 hover:border-primary/20 transition-colors duration-200">
+            <Card className="h-full border-2 border-green-500/10 hover:border-green-500/20 transition-colors duration-200">
               <CardHeader className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-primary" />
+                  <ThumbsUp className="w-5 h-5 text-green-500" />
                   <CardTitle>Courses You Like</CardTitle>
                 </div>
                 <CardDescription className="text-base">
@@ -120,9 +120,8 @@ export default function Home() {
             size="lg"
             onClick={handleGetRecommendations}
             disabled={likedCourses.size === 0}
-            className="group relative overflow-hidden px-8 py-6 text-lg font-semibold transition-all hover:scale-105"
+            className="group relative overflow-hidden px-8 py-6 text-lg font-semibold transition-all hover:scale-105 hover:cursor-pointer"
           >
-            <Sparkles className="w-5 h-5 mr-2 group-hover:animate-pulse" />
             Get Course Recommendations
           </Button>
           {likedCourses.size === 0 && (

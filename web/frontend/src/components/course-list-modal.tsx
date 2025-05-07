@@ -27,7 +27,7 @@ export function CourseDialogModal({
 }) {
   const formatCourseList = () => {
     return courses.map(course => 
-      `${course.CODE} - ${course.NAME} (${course.FACULTY})`
+      `${course.CODE} (${course.FACULTY}) - ${course.NAME}`
     ).join('\n');
   };
 
@@ -42,11 +42,13 @@ export function CourseDialogModal({
 
   const handleShare = async () => {
     const text = formatCourseList();
+    const pageUrl = 'https://muni.courses';
     if (navigator.share) {
       try {
         await navigator.share({
           title: title || 'Course List',
-          text: text
+          text: text,
+          url: pageUrl
         });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
@@ -85,36 +87,38 @@ export function CourseDialogModal({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader className="flex flex-row items-center justify-between">
-          <DialogTitle>{title || 'Course List'}</DialogTitle>
-          <div className="flex gap-2">
-            <Button
-              onClick={handleCopy}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <Copy className="h-4 w-4" />
-              Copy
-            </Button>
-            <Button
-              onClick={handleShare}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <Share2 className="h-4 w-4" />
-              Share
-            </Button>
-            <Button
-              onClick={handleExport}
-              variant="outline"
-              size="sm"
-              className="gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </Button>
+        <DialogHeader>
+          <div className="flex flex-col gap-4">
+            <DialogTitle>{title || 'Course List'}</DialogTitle>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={handleCopy}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copy
+              </Button>
+              <Button
+                onClick={handleShare}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
           </div>
         </DialogHeader>
         <ScrollArea className="h-[60dvh]">

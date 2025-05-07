@@ -94,6 +94,8 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
   };
 
   const handleSubmit = async () => {
+    onOpenChange(false);
+
     await api.post("/log_user_feedback", {
       body: {
         faculty: selectedFaculty ?? null,
@@ -103,7 +105,6 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
       }
     });
 
-    onOpenChange(false);
     setFeedback("");
     setSelectedFaculty("");
     setSelectedPhrases([]);
