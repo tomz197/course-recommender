@@ -4,20 +4,24 @@ A recommendation system for Masaryk University (MUNI) courses leveraging natural
 
 ## Project Overview
 
-This project provides a comprehensive course recommendation system that helps students discover courses that match their interests. It employs two main recommendation approaches:
+This project provides a comprehensive course recommendation system that helps students discover courses that match their interests. It employs multiple recommendation approaches:
 
 1. **Embedding-based recommendations** - Uses text embeddings to find semantically similar courses
 2. **Keyword-based recommendations** - Uses keyword intersection to suggest related courses
+3. **TF-IDF based recommendations** - Utilizes term frequency-inverse document frequency for content-based filtering
+4. **Personality-based recommendations** - Matches courses with student personality traits
 
 ## Repository Structure
 
 ### Data Analysis and Model Training
 - `/notebooks/` - Jupyter notebooks for data analysis, embedding generation, and model evaluation
   - `simple-similarity.ipynb` - Keyword-based recommendation system
-  - `embeddings.ipynb` - Text embedding generation and similarity analysis
+  - `create_embeddings.ipynb` - Text embedding generation and similarity analysis
   - `visualize_embeddings.ipynb` - Interactive visualization of course embeddings
   - `sentence_transformers.ipynb` - Experiments with transformer models
-  - `gemini_embeddings.ipynb` - Explorations with Google's Gemini embeddings
+  - `tf_idf.ipynb` - TF-IDF based recommendation system
+  - `personalities.ipynb` - Personality-based course matching
+  - `test_algorithms.ipynb` - Evaluation of different recommendation algorithms
 
 - `/notebooks/data/` - Data files used in analysis
   - `/formatted/` - Processed course data
@@ -26,6 +30,7 @@ This project provides a comprehensive course recommendation system that helps st
   - `/intersects/` - Keyword intersection matrices
 
 - `/notebooks/scripts/` - Helper scripts for notebooks
+- `/notebooks/analysis/` - Additional analysis notebooks
 
 ### Web Application
 - `/web/` - Web application for course recommendations
@@ -80,7 +85,14 @@ This project provides a comprehensive course recommendation system that helps st
 
 - `visualize_embeddings.ipynb` - An interactive visualization of course embeddings that demonstrates how different courses relate to each other in the embedding space
 - `simple-similarity.ipynb` - A demonstration of keyword-based course recommendations
-- `embeddings.ipynb` - The main notebook for generating course embeddings and evaluating recommendation quality
+- `create_embeddings.ipynb` - The main notebook for generating course embeddings and evaluating recommendation quality
+- `tf_idf.ipynb` - Implementation of TF-IDF based recommendations
+- `personalities.ipynb` - Analysis of personality-based course matching
+- `test_algorithms.ipynb` - Comprehensive evaluation of different recommendation approaches
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
