@@ -432,15 +432,21 @@ def recommend_max_with_combinations(
     (i, j) for i in range(len(liked_embeds)) for j in range(i, len(liked_embeds))
   ]
 
+  indices_of_non_combinations_candidates = [k for k, (i, j) in enumerate(target_embeds_index_to_pair) if i == j]
+
   # 1. calculate overall similarity
   candidate_embeds_norm = all_embeds / np.linalg.norm(all_embeds, axis=1, keepdims=True)
   target_embeds_norm = targed_embeds / np.linalg.norm(targed_embeds, axis=1, keepdims=True)
   # Shape: (len(candidate_idxs), len(targed_embeds))
   similarity_target = np.dot(candidate_embeds_norm, target_embeds_norm.T)
 
-  # 2. select best match for each course and note to which target it macthed best
+  # 2. select best match for each course and note to which target it matched best
   best_match_target_score = np.max(similarity_target, axis=1)
   best_match_target = np.argmax(similarity_target, axis=1)
+
+  # Penalize courses that are closest to non-combinations
+  closest_to_non_combinations_candidates = np.isin(best_match_target, indices_of_non_combinations_candidates)
+  best_match_target_score[closest_to_non_combinations_candidates] *= 0.95
 
   # Calculate similarity to original liked courses for filtering
   liked_embeds_norm = liked_embeds / np.linalg.norm(liked_embeds, axis=1, keepdims=True)
