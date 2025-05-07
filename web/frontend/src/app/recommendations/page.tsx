@@ -8,15 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ThumbsDown, ThumbsUp, ExternalLink, MessageSquare } from "lucide-react";
+import { ThumbsDown, ThumbsUp, MessageSquare } from "lucide-react";
 import { useRecommendCourses } from "@/hooks/use-recommend-courses";
 import { storageController } from "@/storage";
 import { Course } from "@/types";
-import { CourseBadge, SelectedCourses } from "@/components/selected-courses";
+import { CourseBadge } from "@/components/selected-courses";
 import { logFeedback } from "@/lib/log-feedback";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { UserFeedback } from "@/components/user-feedback";
 import { useCoursePreferences } from "@/components/course-provider";
+import { CourseIsLink } from "@/components/course-is-link";
+import { CourseDialogModal } from "@/components/course-list-modal";
 
 export default function RecommendationsPage() {
   const { likedCourses, dislikedCourses, skippedCourses, addLikedCourse, addDislikedCourse, addSkippedCourse, removeLikedCourse, removeDislikedCourse, removeSkippedCourse } = useCoursePreferences();
@@ -82,27 +84,24 @@ export default function RecommendationsPage() {
 
   return (
     <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto">
-      <div className="flex flex-col justify-center max-w-2xl mx-auto gap-2 p-2">
-        <SelectedCourses
+      <div className="grid grid-cols-3 max-w-2xl mx-auto gap-2 py-2">
+        <CourseDialogModal
           courses={Array.from(likedCourses.values()).reverse()}
           onRemove={handleRemoveLikedCourse}
-          emptyMessage="No liked courses selected yet"
-          wrap={false}
           title="Liked courses"
+          triggerText="Liked courses"
         />
-        <SelectedCourses
+        <CourseDialogModal
           courses={Array.from(dislikedCourses.values()).reverse()}
           onRemove={handleRemoveDislikedCourse}
-          emptyMessage="No disliked courses selected yet"
-          wrap={false}
           title="Disiked courses"
+          triggerText="Disiked courses"
         />
-        <SelectedCourses
+        <CourseDialogModal
           courses={Array.from(skippedCourses.values()).reverse()}
           onRemove={handleRemoveSkippedCourse}
-          emptyMessage="No skipped courses selected yet"
-          wrap={false}
           title="Skipped courses"
+          triggerText="Skipped courses"
         />
       </div>
 
@@ -332,16 +331,7 @@ function CourseCard({
         )}
 
         {/* External Link */}
-        <a
-          href={`https://is.muni.cz/predmet/${
-            recommendation.FACULTY === "P\u0159F" ? "sci" : recommendation.FACULTY
-          }/${recommendation.CODE}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center hover:underline text-sm text-blue-500 hover:text-blue-600"
-        >
-          View in IS MU <ExternalLink className="h-4 w-4 ml-1" />
-        </a>
+        <CourseIsLink course={recommendation} />
       </CardContent>
       <CardFooter className="flex justify-between">
         {!isLoading ? (

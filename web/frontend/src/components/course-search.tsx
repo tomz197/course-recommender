@@ -3,8 +3,9 @@
 import * as React from "react"
 import { useSearchCourses } from "@/hooks/use-search-courses"
 import type { CourseSearch } from "@/types"
-import { Loader2 } from "lucide-react"
+import { Loader2, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Input } from "./ui/input"
 
 interface CourseSearchProps {
   onSelectCourse: (course: CourseSearch) => void
@@ -81,16 +82,19 @@ export function CourseSearch({
   return (
     <div className="relative w-full">
       <div className="relative">
-        <input
-          ref={inputRef}
-          type="text"
-          value={searchQuery}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => searchQuery.length > 0 && setOpen(true)}
-          placeholder={placeholder}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            ref={inputRef}
+            type="text"
+            value={searchQuery}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => searchQuery.length > 0 && setOpen(true)}
+            placeholder={placeholder}
+            className="pl-10 h-12 text-lg shadow-lg border-2 focus:border-primary"
+          />
+        </div>
       </div>
 
       {open && (
