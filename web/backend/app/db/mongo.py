@@ -113,7 +113,6 @@ class MongoDBLogger():
         try:
             feedback_doc = {
                 "text": log.text,
-                "rating": log.rating,
                 "faculty": log.faculty,
                 "user_id": log.user_id,
                 "phrases": log.phrases,
