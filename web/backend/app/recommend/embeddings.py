@@ -448,8 +448,10 @@ def recommend_max_with_combinations(
   best_match_liked = np.max(similarity_liked, axis=1)
 
   # Filter out courses that are too similar to liked ones
-  to_filter_idx = np.where(best_match_liked > 0.97)[0]
+  to_filter_idx = np.where(best_match_liked > 0.95)[0]
   best_match_target_score[to_filter_idx] = -np.inf
+  num_filtered_out_liked = len(to_filter_idx)
+  print(f"Filtered out {num_filtered_out_liked} courses that are too similar to liked ones")
 
   # 3. filter out courses that are too similar to disliked ones
   if disliked_embeds.shape[0] > 0:
@@ -457,8 +459,10 @@ def recommend_max_with_combinations(
     similarity_disliked = np.dot(candidate_embeds_norm, disliked_embeds_norm.T)
     best_match_disliked = np.max(similarity_disliked, axis=1)
 
-    to_filter_idx = np.where(best_match_disliked > 0.9)[0]
+    to_filter_idx = np.where(best_match_disliked > 0.8)[0]
     best_match_target_score[to_filter_idx] = -np.inf
+    num_filtered_out_disliked = len(to_filter_idx)
+    print(f"Filtered out {num_filtered_out_disliked} courses that are too similar to disliked ones")
 
   # 4. get indices of top n courses
   selected_idxs = np.argsort(-best_match_target_score)[:(n + len(excluded))]
