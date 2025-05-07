@@ -89,19 +89,19 @@ export default function RecommendationsPage() {
           courses={Array.from(likedCourses.values()).reverse()}
           onRemove={handleRemoveLikedCourse}
           title={`Liked courses (${likedCourses.size})`}
-          triggerText={`Liked courses (${likedCourses.size})`}
+          triggerText={`Liked (${likedCourses.size})`}
         />
         <CourseDialogModal
           courses={Array.from(dislikedCourses.values()).reverse()}
           onRemove={handleRemoveDislikedCourse}
           title={`Disiked courses (${dislikedCourses.size})`}
-          triggerText={`Disiked courses (${dislikedCourses.size})`}
+          triggerText={`Disiked (${dislikedCourses.size})`}
         />
         <CourseDialogModal
           courses={Array.from(skippedCourses.values()).reverse()}
           onRemove={handleRemoveSkippedCourse}
           title={`Skipped courses (${skippedCourses.size})`}
-          triggerText={`Skipped courses (${skippedCourses.size})`}
+          triggerText={`Skipped (${skippedCourses.size})`}
         />
       </div>
 
