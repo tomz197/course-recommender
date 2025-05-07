@@ -169,7 +169,7 @@ async def course(course_id: str) -> CourseWithId:
 
 @app.get("/models", response_model=List[str])
 async def models() -> List[str]:
-    return ["max_with_combinations", "keywords_tfidf", "embeddings_mmr", "embeddings_max", "baseline"]
+    return ["max_with_combinations", "keywords_tfidf"]
 
 
 @app.get("/health")

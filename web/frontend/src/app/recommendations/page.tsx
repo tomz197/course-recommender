@@ -46,7 +46,7 @@ export default function RecommendationsPage() {
       skipped: skippedCourses,
     }, recommendation, feedback);
 
-    if (storageController.getRecommendedCount() == 6) {
+    if (storageController.getRecommendedCount() == 12) {
       setIsFeedbackOpen(true);
     }
 

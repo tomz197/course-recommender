@@ -52,7 +52,7 @@ export default function VisualizationPage() {
   const [showDescription, setShowDescription] = useState(true);
 
   return (
-    <div className="container mx-auto py-6 flex flex-col gap-4">
+    <div className="container mx-auto py-6 flex flex-col gap-4 px-4">
       <Alert variant="destructive" className='md:hidden'>
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Small screen detected</AlertTitle>
@@ -253,12 +253,12 @@ function CourseVisualization() {
       </div>
 
       {/* Visualization container */}
-      <div className={`relative border rounded-lg overflow-hidden p-2 flex flex-1 min-h-[600px]`}>
+      <div className={`relative border rounded-lg overflow-hidden p-2 flex flex-1 min-h-[600px] aspect-video mx-auto`}>
         <Plot
           data={traces as Data[]}
           layout={layout}
           config={config}
-          className={`w-full h-full ${isFullscreen ? 'flex-1' : 'max-h-[80vh]'}`}
+          className={`w-full h-full aspect-video mx-auto ${isFullscreen ? 'flex-1' : 'max-h-[80vh]'}`}
           key={`plot-${isFullscreen}`}
           onClick={(event: Plotly.PlotMouseEvent) => {
             if (event.points && event.points[0]) {
