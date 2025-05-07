@@ -103,3 +103,13 @@ class CourseClient:
         sorted_df = self.df.sort_values('ID')
         records = sorted_df.to_dict(orient='records')
         return [CourseWithId(**self._convert_numpy_arrays(record)) for record in records]
+
+    def filter_courses(self, course: CourseWithId) -> CourseWithId:
+        """
+        Returns true if the course should be filtered
+
+        :param course: The course to check.
+        :return: True if the course should be filtered, False otherwise.
+        """
+        return (course.NAME and any(keyword in course.NAME.lower() for keyword in ['thesis', 'diplomov', 'bakalářsk', 'státnic'])) or \
+            (course.NAME_EN and any(keyword in course.NAME_EN.lower() for keyword in ['thesis', 'state exam']))

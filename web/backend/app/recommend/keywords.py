@@ -69,7 +69,7 @@ def recommend_courses_keywords(liked: List[str], disliked: List[str], skipped: L
     res = []
     excluded_ids = set(liked_ids + disliked_ids + skipped_ids)
     for idx, _ in top_courses:
-        if idx in excluded_ids:
+        if idx in excluded_ids or courseClient.filter_courses(courseClient.get_course_by_id(idx)):
             continue
         course = courseClient.get_course_by_id(idx)
         course.RECOMMENDED_FROM = calculate_recommended_from(idx, liked_ids, disliked_ids, kwd_intersects, courseClient)

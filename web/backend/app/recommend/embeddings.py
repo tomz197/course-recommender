@@ -465,13 +465,16 @@ def recommend_max_with_combinations(
     print(f"Filtered out {num_filtered_out_disliked} courses that are too similar to disliked ones")
 
   # 4. get indices of top n courses
-  selected_idxs = np.argsort(-best_match_target_score)[:(n + len(excluded))]
-  selected_idxs = [i for i in selected_idxs if i not in excluded_indices]
-
+  selected_idxs = np.argsort(-best_match_target_score)
+  
   # 5. fetch the courses in the final order
   recommendations: list[dict] = []
   for idx in selected_idxs:
     course = courseClient.get_course_by_id(idx)
+    if idx in excluded_indices:
+      continue
+    if courseClient.filter_courses(course):
+      continue
     if course:
       # Optionally, attach the similarity score
       # course.SIMILARITY = float(best_match_liked[idx])
@@ -484,6 +487,8 @@ def recommend_max_with_combinations(
       else:
          course.RECOMMENDED_FROM = [best_match_course1.CODE, best_match_course2.CODE]
       recommendations.append(course)
+      if len(recommendations) >= n:
+        break
 
   return recommendations
 
