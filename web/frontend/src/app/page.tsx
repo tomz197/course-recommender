@@ -12,8 +12,19 @@ import { useNavigate } from "react-router";
 import { useCoursePreferences } from "@/components/course-provider";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function Home() {
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
+  return (
+    <main className="min-h-screen">
+      {isMobile ? <HomeMobile /> : <HomeDesktop />}
+    </main>
+  );
+}
+
+function HomeMobile() {
   const navigate = useNavigate();
   const { likedCourses, dislikedCourses, addLikedCourse, addDislikedCourse, removeLikedCourse, removeDislikedCourse } = useCoursePreferences();
 
@@ -22,7 +33,114 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
+    <div className="container mx-auto px-4 py-4 pb-24 flex flex-col gap-4">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center text-center mb-6"
+      >
+        <h1 className="text-2xl font-bold mb-3">
+          MUNI Course Recommendation
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Select courses you like and dislike to get personalized recommendations
+        </p>
+      </motion.div>
+
+      <div className="flex flex-col gap-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <ThumbsUp className="w-5 h-5 text-green-500" />
+                <h3 className="text-lg font-semibold">Liked Courses</h3>
+              </div>
+              <SelectedCourses
+                courses={Array.from(likedCourses.values())}
+                onRemove={removeLikedCourse}
+                emptyMessage="No liked courses"
+                title="Liked courses"
+              />
+              <CourseSearch
+                onSelectCourse={addLikedCourse}
+                placeholder="Search courses..."
+                excludeCourses={[
+                  ...likedCourses.values(),
+                  ...dislikedCourses.values(),
+                ]}
+              />
+            </div>
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <ThumbsDown className="w-5 h-5 text-destructive" />
+                <h3 className="text-lg font-semibold">Disliked Courses</h3>
+              </div>
+              <SelectedCourses
+                courses={Array.from(dislikedCourses.values())}
+                onRemove={removeDislikedCourse}
+                emptyMessage="No disliked courses"
+                title="Disliked courses"
+              />
+              <CourseSearch
+                onSelectCourse={addDislikedCourse}
+                placeholder="Search courses..."
+                excludeCourses={[
+                  ...likedCourses.values(),
+                  ...dislikedCourses.values(),
+                ]}
+              />
+            </div>
+      </motion.div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t"
+      >
+        <Button
+          size="lg"
+          onClick={handleGetRecommendations}
+          disabled={likedCourses.size === 0}
+          className="w-full group relative overflow-hidden py-4 text-lg font-semibold transition-all hover:scale-105 hover:cursor-pointer"
+        >
+          Get Recommendations
+        </Button>
+        {likedCourses.size === 0 && (
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-muted-foreground text-center mt-2"
+          >
+            Select at least one course you like
+          </motion.p>
+        )}
+      </motion.div>
+    </div>
+  );
+}
+
+function HomeDesktop() {
+  const navigate = useNavigate();
+  const { likedCourses, dislikedCourses, addLikedCourse, addDislikedCourse, removeLikedCourse, removeDislikedCourse } = useCoursePreferences();
+
+  const handleGetRecommendations = () => {
+    navigate("/recommendations");
+  };
+
+  return (
+    <>
       <div className="container mx-auto px-1 sm:px-4 py-4 sm:p-8 md:py-12">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -135,6 +253,6 @@ export default function Home() {
           )}
         </motion.div>
       </div>
-    </main>
+    </>
   );
 }
