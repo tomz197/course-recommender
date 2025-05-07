@@ -10,7 +10,7 @@ import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
 import { useNavigate } from "react-router";
 import { useCoursePreferences } from "@/components/course-provider";
-import { ThumbsUp, ThumbsDown, Sparkles } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Home() {
