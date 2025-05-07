@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import "./index.css";
 import { setPredictionModel } from "@/lib/set-prediction-model";
 import { CourseProvider } from "@/components/course-provider";
+import { RouterErrorBoundary } from "@/components/error-boundary";
 
 // Lazy load pages
 const Home = lazy(() => import("@/app/page"));
@@ -23,6 +24,7 @@ const router = createHashRouter(
     {
       path: "/",
       element: <RootLayout />,
+      errorElement: <RouterErrorBoundary />,
       children: [
         { 
           path: "", 
