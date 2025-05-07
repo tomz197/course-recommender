@@ -69,6 +69,7 @@ class UserFeedbackLog():
     rating: Optional[int] = None
     faculty: Optional[str] = None
     phrases: List[str] = None
+    model: str = None
     user_id: str = ""
 
 @dataclass

@@ -101,6 +101,7 @@ export function UserFeedback({ isOpen, onOpenChange }: UserFeedbackProps) {
         faculty: selectedFaculty ?? null,
         text: feedback ?? null,
         phrases: selectedPhrases,
+        model: storageController.getPredictionModel(),
         user_id: storageController.getUserID(),
       }
     });

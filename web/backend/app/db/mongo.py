@@ -116,6 +116,7 @@ class MongoDBLogger():
                 "faculty": log.faculty,
                 "user_id": log.user_id,
                 "phrases": log.phrases,
+                "model": log.model,
                 "timestamp": datetime.now()
             }
 
