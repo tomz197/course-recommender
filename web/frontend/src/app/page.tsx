@@ -13,8 +13,19 @@ import { useCoursePreferences } from "@/components/course-provider";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { Suspense } from "react";
+import { LoadingSpinner } from "@/components/loading-spinner";
+
 
 export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <HomeInner />
+    </Suspense>
+  );
+}
+
+function HomeInner() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   return (
@@ -54,7 +65,7 @@ function HomeMobile() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <ThumbsUp className="w-5 h-5 text-green-500" />
                 <h3 className="text-lg font-semibold">Liked Courses</h3>
@@ -68,6 +79,7 @@ function HomeMobile() {
               <CourseSearch
                 onSelectCourse={addLikedCourse}
                 placeholder="Search courses..."
+                inputStyle="shadow-green-500/10 border-green-500/20"
                 excludeCourses={[
                   ...likedCourses.values(),
                   ...dislikedCourses.values(),
@@ -80,7 +92,7 @@ function HomeMobile() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-            <div className="space-y-4">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <ThumbsDown className="w-5 h-5 text-destructive" />
                 <h3 className="text-lg font-semibold">Disliked Courses</h3>
@@ -94,6 +106,7 @@ function HomeMobile() {
               <CourseSearch
                 onSelectCourse={addDislikedCourse}
                 placeholder="Search courses..."
+                inputStyle="shadow-destructive/10 border-destructive/20"
                 excludeCourses={[
                   ...likedCourses.values(),
                   ...dislikedCourses.values(),

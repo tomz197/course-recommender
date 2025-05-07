@@ -9,6 +9,7 @@ import "./index.css";
 import { setPredictionModel } from "@/lib/set-prediction-model";
 import { CourseProvider } from "@/components/course-provider";
 import { RouterErrorBoundary } from "@/components/error-boundary";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 // Lazy load pages
 const Home = lazy(() => import("@/app/page"));
@@ -29,7 +30,7 @@ const router = createHashRouter(
         { 
           path: "", 
           element: (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<LoadingSpinner />}>
               <Home />
             </Suspense>
           ) 
@@ -37,7 +38,7 @@ const router = createHashRouter(
         { 
           path: "recommendations", 
           element: (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<LoadingSpinner />}>
               <RecommendationsPage />
             </Suspense>
           ) 
@@ -45,7 +46,7 @@ const router = createHashRouter(
         { 
           path: "visualization", 
           element: (
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<LoadingSpinner />}>
               <VisualizationPage />
             </Suspense>
           ) 

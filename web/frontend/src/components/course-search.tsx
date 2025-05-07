@@ -11,6 +11,7 @@ interface CourseSearchProps {
   onSelectCourse: (course: CourseSearch) => void
   placeholder?: string
   excludeCourses?: CourseSearch[]
+  inputStyle?: string
 }
 
 const loadCoursesNumber = 100
@@ -19,6 +20,7 @@ export function CourseSearch({
   onSelectCourse,
   placeholder = "Search courses...",
   excludeCourses = [],
+  inputStyle,
 }: CourseSearchProps) {
   const [open, setOpen] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -92,7 +94,7 @@ export function CourseSearch({
             onKeyDown={handleKeyDown}
             onFocus={() => searchQuery.length > 0 && setOpen(true)}
             placeholder={placeholder}
-            className="pl-10 h-12 text-lg shadow-lg border-2 focus:border-primary"
+            className={cn(inputStyle, "pl-10 h-12 text-lg shadow-lg border-2")}
           />
         </div>
       </div>

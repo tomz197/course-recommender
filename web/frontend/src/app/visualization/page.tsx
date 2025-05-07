@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import Plot from 'react-plotly.js';
 import { Data, Layout, Config } from 'plotly.js';
 import type { DataPoint } from '@/assets/tsne_visualization_data';
@@ -16,8 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { filterCourses } from '@/hooks/use-search-courses';
-
-const { tsne_data } = await import('@/assets/tsne_visualization_data');
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 const getFacultyColor = (faculty: string) => ({
   'FI': '#f2d45c',
@@ -49,6 +48,16 @@ const faculties = [
 ];
 
 export default function VisualizationPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <VisualizationPageInner />
+    </Suspense>
+  );
+}
+
+const { tsne_data } = await import('@/assets/tsne_visualization_data');
+
+function VisualizationPageInner() {
   const [showDescription, setShowDescription] = useState(true);
 
   return (

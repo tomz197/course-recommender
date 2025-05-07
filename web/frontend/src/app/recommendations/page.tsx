@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,8 +19,18 @@ import { UserFeedback } from "@/components/user-feedback";
 import { useCoursePreferences } from "@/components/course-provider";
 import { CourseIsLink } from "@/components/course-is-link";
 import { CourseDialogModal } from "@/components/course-list-modal";
+import { motion, AnimatePresence } from "framer-motion";
+import { LoadingSpinner } from "@/components/loading-spinner";
 
 export default function RecommendationsPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <RecommendationsPageInner />
+    </Suspense>
+  );
+}
+
+function RecommendationsPageInner() {
   const { likedCourses, dislikedCourses, skippedCourses, addLikedCourse, addDislikedCourse, addSkippedCourse, removeLikedCourse, removeDislikedCourse, removeSkippedCourse } = useCoursePreferences();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
@@ -83,7 +93,7 @@ export default function RecommendationsPage() {
   };
 
   return (
-    <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto">
+    <main className="container mx-auto sm:px-4 sm:py-8 md:py-12 gap-0 sm:gap-8 my-auto overflow-x-hidden">
       <div className="grid grid-cols-3 max-w-2xl mx-auto gap-2 py-2">
         <CourseDialogModal
           courses={Array.from(likedCourses.values()).reverse()}
@@ -213,8 +223,22 @@ function CourseCard({
   const [showVerySlowFeedback, setShowVerySlowFeedback] = useState(false);
   const [slowFeedbackTimeout, setSlowFeedbackTimeout] = useState<number | null>(null);
   const [verySlowFeedbackTimeout, setVerySlowFeedbackTimeout] = useState<number | null>(null);
+  const [exitDirection, setExitDirection] = useState<"left" | "right" | "up" | null>(null);
 
   const handleFeedback = (feedback: "like" | "dislike" | "skip") => {
+    // Set exit direction based on feedback type
+    switch (feedback) {
+      case "like":
+        setExitDirection("right");
+        break;
+      case "dislike":
+        setExitDirection("left");
+        break;
+      case "skip":
+        setExitDirection("up");
+        break;
+    }
+
     handleFeedbackProp(feedback);
 
     if (slowFeedbackTimeout) {
@@ -256,117 +280,175 @@ function CourseCard({
     'PřF': '#00af3f'
   })[faculty] || '#000000';
 
+  const cardVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: (direction: "left" | "right" | "up" | null) => {
+      switch (direction) {
+        case "left":
+          return { x: -50, opacity: 0 };
+        case "right":
+          return { x: 50, opacity: 0 };
+        case "up":
+          return { y: -50, opacity: 0 };
+        default:
+          return { opacity: 0 };
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2">
-    {showSlowFeedback && !showVerySlowFeedback && isLoading && (
-      <Alert variant="default">
-        <AlertTitle>Slow response</AlertTitle>
-        <AlertDescription>
-          The response is taking longer than expected. Please be patient.
-        </AlertDescription>
-      </Alert>
-    )}
-    {showVerySlowFeedback && isLoading && (
-      <Alert variant="default">
-        <AlertTitle>Almost there!</AlertTitle>
-        <AlertDescription>
-          Sometimes it takes a while for the first response. Other will be much faster!!!
-        </AlertDescription>
-      </Alert>
-    )}
-    
-    <Card className="w-full max-w-2xl rounded-none sm:rounded-lg">
-      <CardHeader className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
-        <CardTitle className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-white px-2 py-1 rounded text-nowrap" style={{ backgroundColor: getFacultyColor(recommendation.FACULTY) }}>
-                {recommendation.CODE}
-                {" "}
-                {recommendation.FACULTY}
-              </span>
-              <div className="flex items-center gap-2 mb-0.5 text-sm text-muted-foreground flex-wrap">
-                <span>{recommendation.SEMESTER.split(" ")[0]}</span>
-                {recommendation.CREDITS && (
-                  <>
-                    <span>•</span>
-                    <span>{recommendation.CREDITS} credits</span>
-                  </>
-                )}
-                <span>•</span>
-                <span>{recommendation.COMPLETION}</span>
+      <AnimatePresence mode="wait">
+        {showSlowFeedback && !showVerySlowFeedback && isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Alert variant="default">
+              <AlertTitle>Slow response</AlertTitle>
+              <AlertDescription>
+                The response is taking longer than expected. Please be patient.
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+        {showVerySlowFeedback && isLoading && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <Alert variant="default">
+              <AlertTitle>Almost there!</AlertTitle>
+              <AlertDescription>
+                Sometimes it takes a while for the first response. Other will be much faster!!!
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={recommendation.CODE}
+          variants={cardVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          custom={exitDirection}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <Card className="w-full max-w-2xl rounded-none sm:rounded-lg">
+            <CardHeader className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
+              <CardTitle className="flex justify-between items-start">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm text-white px-2 py-1 rounded text-nowrap" style={{ backgroundColor: getFacultyColor(recommendation.FACULTY) }}>
+                      {recommendation.CODE}
+                      {" "}
+                      {recommendation.FACULTY}
+                    </span>
+                    <div className="flex items-center gap-2 mb-0.5 text-sm text-muted-foreground flex-wrap">
+                      <span>{recommendation.SEMESTER.split(" ")[0]}</span>
+                      {recommendation.CREDITS && (
+                        <>
+                          <span>•</span>
+                          <span>{recommendation.CREDITS} credits</span>
+                        </>
+                      )}
+                      <span>•</span>
+                      <span>{recommendation.COMPLETION}</span>
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-semibold mt-2">{recommendation.NAME}</h2>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
+              {/* Description */}
+              <div>
+                <h3 className="font-medium mb-1">Description</h3>
+                <p className="font-light">
+                  {recommendation.DESCRIPTION ||
+                    "This course is recommended based on your preferences. No detailed description available."}
+                </p>
               </div>
-            </div>
-            <h2 className="text-xl font-semibold mt-2">{recommendation.NAME}</h2>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className={`space-y-4 ${isLoading ? "animate-pulse opacity-50" : ""}`}>
-        {/* Description */}
-        <div>
-          <h3 className="font-medium mb-1">Description</h3>
-          <p className="font-light">
-            {recommendation.DESCRIPTION ||
-              "This course is recommended based on your preferences. No detailed description available."}
-          </p>
-        </div>
 
-        {/* Keywords */}
-        {recommendation.KEYWORDS && recommendation.KEYWORDS.length > 0 && (
-          <div>
-            <h3 className="font-medium mb-2">Keywords</h3>
-            <div className="overflow-x-auto pb-1">
-              <div className="flex gap-2 min-w-max">
-                {recommendation.KEYWORDS.map((keyword, index) => (
-                  <span
-                    key={index}
-                    className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-sm whitespace-nowrap"
+              {/* Keywords */}
+              {recommendation.KEYWORDS && recommendation.KEYWORDS.length > 0 && (
+                <div>
+                  <h3 className="font-medium mb-2">Keywords</h3>
+                  <div className="overflow-x-auto pb-1">
+                    <div className="flex gap-2 min-w-max">
+                      {recommendation.KEYWORDS.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-secondary text-secondary-foreground rounded-full text-sm whitespace-nowrap"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* External Link */}
+              <CourseIsLink course={recommendation} />
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              {!isLoading ? (
+                <div className="grid grid-cols-3 gap-2 flex-1">
+                  <Button
+                    onClick={() => handleFeedback("dislike")}
+                    className="flex-1 bg-muted hover:bg-red-100 transition-colors duration-150"
+                    variant="outline"
+                    asChild
                   >
-                    {keyword}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* External Link */}
-        <CourseIsLink course={recommendation} />
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        {!isLoading ? (
-          <div className="grid grid-cols-3 gap-2 flex-1">
-            <Button
-              onClick={() => handleFeedback("dislike")}
-              className="flex-1 bg-muted hover:bg-red-100 transition-colors duration-150"
-              variant="outline"
-            >
-              <ThumbsDown className="mr-2 h-4 w-4" />
-              Dislike
-            </Button>
-            <Button
-              onClick={() => handleFeedback("skip")}
-              className="flex-1 hover:bg-gray-50 transition-colors duration-150"
-              variant="outline"
-            >
-              Skip
-            </Button>
-            <Button
-              onClick={() => handleFeedback("like")}
-              className="flex-1 bg-muted hover:bg-green-100 transition-colors duration-150"
-              variant="outline"
-            >
-              <ThumbsUp className="mr-2 h-4 w-4" />
-              Like
-            </Button>
-          </div>
-        ) : (
-          <Button variant="outline" className="w-full">
-            Loading...
-          </Button>
-        )}
-      </CardFooter>
-    </Card>
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <div className="flex items-center justify-center">
+                        <ThumbsDown className="mr-2 h-4 w-4" />
+                        Dislike
+                      </div>
+                    </motion.div>
+                  </Button>
+                  <Button
+                    onClick={() => handleFeedback("skip")}
+                    className="flex-1 hover:bg-gray-50 transition-colors duration-150"
+                    variant="outline"
+                    asChild
+                  >
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <div className="flex items-center justify-center">
+                        Skip
+                      </div>
+                    </motion.div>
+                  </Button>
+                  <Button
+                    onClick={() => handleFeedback("like")}
+                    className="flex-1 bg-muted hover:bg-green-100 transition-colors duration-150"
+                    variant="outline"
+                    asChild
+                  >
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <div className="flex items-center justify-center">
+                        <ThumbsUp className="mr-2 h-4 w-4" />
+                        Like
+                      </div>
+                    </motion.div>
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="outline" className="w-full">
+                  Loading...
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }

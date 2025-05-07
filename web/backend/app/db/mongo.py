@@ -39,7 +39,10 @@ class MongoDBLogger():
                 raise ValueError("MongoDB connection string not found")
 
             self.client = MongoClient(connection_string)
-            self.db = self.client.get_database("course_feedback")
+            if os.getenv("ENVIRONMENT") == "dev":
+                self.db = self.client.get_database("course_feedback_dev")
+            else:
+                self.db = self.client.get_database("course_feedback")
 
             # Create indexes for efficient queries
             self.db.recommendation_feedback.create_index([("user_id", pymongo.ASCENDING)])
