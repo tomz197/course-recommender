@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { Data, Layout, Config } from 'plotly.js';
 import type { DataPoint } from '@/assets/tsne_visualization_data';
-import { AlertCircle, ExternalLink, Maximize2, X } from 'lucide-react';
+import { AlertCircle, ExternalLink, Filter, Maximize2, Search, X } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -75,6 +75,9 @@ export default function VisualizationPage() {
         {showDescription && (
           <>
             <p className="mb-2">
+              Shape similarity with Czech Republic is purely coincidental. It can be attributed only to divine intervention.
+            </p>
+            <p className="mb-2">
               Each point represents a course, with the <strong>size</strong> indicating the number of students 
               enrolled and the <strong>color</strong> representing the faculty. Courses that appear closer together 
               in this visualization have similar content based on their course descriptions.
@@ -109,6 +112,19 @@ function CourseVisualization() {
   const [selectedFaculty, setSelectedFaculty] = useState('All');
   const [selectedPoint, setSelectedPoint] = useState<DataPoint | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      window.scrollTo(0, 0);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isFullscreen]);
 
   // Memoize filtered data
   const filteredCodes = useMemo(() => {
@@ -223,18 +239,15 @@ function CourseVisualization() {
   }), []);
 
   return (
-    <div className={`flex flex-1 flex-col gap-4 ${isFullscreen ? 'absolute inset-0 z-50 bg-background p-4' : ''}`}>
+    <div className={`flex flex-1 flex-col gap-4 ${isFullscreen ? 'absolute inset-0 z-50 bg-background p-4 left-0 top-0 right-0 bottom-0' : ''}`}>
       {/* Filters */}
-      <div className="flex gap-4">
-        <Input
-          type="text"
-          placeholder="Search by course name or code ..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex gap-4 max-w-screen-lg mx-auto w-full">
         <Select onValueChange={(value) => setSelectedFaculty(value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Faculty" />
+          <SelectTrigger className="w-[150px]">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="Faculty" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             {faculties.map((faculty) => (
@@ -242,8 +255,18 @@ function CourseVisualization() {
                 {faculty === 'All' ? 'All faculties' : faculty}
               </SelectItem>
             ))}
-        </SelectContent>
+          </SelectContent>
         </Select>
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search by course name or code ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
+        </div>
         <Button
           onClick={() => setIsFullscreen(!isFullscreen)}
           size="icon"
