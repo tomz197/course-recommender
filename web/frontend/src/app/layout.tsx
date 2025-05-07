@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Link, Outlet, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate, useLocation } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Github, Menu } from "lucide-react";
 import Brandmark from "@/components/brandmark";
@@ -26,6 +26,7 @@ import {
 
 export default function RootLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <>
@@ -40,6 +41,7 @@ export default function RootLayout() {
                 navigate("/");
               }}
               variant="ghost"
+              className={location.pathname === "/" ? "underline" : ""}
             >
               Home
             </Button>
@@ -48,6 +50,7 @@ export default function RootLayout() {
                 navigate("/visualization");
               }}
               variant="ghost"
+              className={location.pathname === "/visualization" ? "underline" : ""}
             >
               Visualization
             </Button>

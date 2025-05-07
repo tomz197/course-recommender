@@ -11,7 +11,7 @@ const getRecommendations = async (
   params: CoursePreferences,
 ): Promise<Course> => {
   storageController.incrementRecommendedCount();
-  let model = storageController.getPredictionModel();
+  let model = storageController.getPredictionModel() ?? "max_with_combinations";
   const relevance = storageController.getRelevance();
 
   const res = (await api.post(`/recommendations?n=1&model=${model}&relevance=${relevance}`, {
