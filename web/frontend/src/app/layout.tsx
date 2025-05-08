@@ -76,7 +76,10 @@ export default function RootLayout() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => navigate("/")}>
-                  Course search
+                  Home
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/visualization")}>
+                  Visualization
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
