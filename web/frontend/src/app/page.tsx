@@ -29,7 +29,7 @@ function HomeInner() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   return (
-    <main className="min-h-screen max-w-screen-lg mx-auto w-full">
+    <main className="min-h-screen max-w-screen-lg mx-auto w-full py-4 pb-24 relative">
       {isMobile ? <HomeMobile /> : <HomeDesktop />}
       {/* Visualization Advertisement Section */}
       <motion.div
@@ -71,7 +71,7 @@ function HomeMobile() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 pb-24 flex flex-col gap-4">
+    <div className="mx-auto px-4 py-4 pb-24 flex flex-col gap-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -147,7 +147,7 @@ function HomeMobile() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t"
+        className="fixed bottom-0 left-0 right-0 p-4 bg-background/30 backdrop-blur-sm border-t z-10"
       >
         <Button
           size="lg"

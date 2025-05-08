@@ -23,10 +23,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMediaQuery("(max-width: 768px)"); // NOTE: Due to main page floating recommendation button, we need to add padding to the bottom of the page
 
   return (
     <>
@@ -109,7 +111,7 @@ export default function RootLayout() {
           <Outlet />
         </div>
       </div>
-      <footer className="bg-primary-foreground text-primary-background p-4 text-center">
+      <footer className={`bg-primary-foreground text-primary-background p-4 text-center ${isMobile && location.pathname === "/" ? "pb-20" : ""}`}>
         <a href="https://github.com/tomz197/pv254-project" target="_blank" rel="noreferrer">
           <Button variant="outline">GitHub <Github className="h-5 w-5" /></Button>
         </a>
