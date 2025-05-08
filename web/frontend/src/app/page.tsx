@@ -29,7 +29,7 @@ function HomeInner() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen max-w-screen-lg mx-auto w-full">
       {isMobile ? <HomeMobile /> : <HomeDesktop />}
       {/* Visualization Advertisement Section */}
       <motion.div

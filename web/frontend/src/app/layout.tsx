@@ -31,7 +31,8 @@ export default function RootLayout() {
   return (
     <>
       <div className="flex flex-col justify-center min-h-screen">
-        <header className="bg-primary-foreground flex justify-between text-primary-background p-4">
+        <header className="bg-primary-foreground w-full">
+          <div className="flex justify-between text-primary-background p-4 max-w-screen-lg mx-auto">
           <Link className="cursor-pointer" to="/">
             <Brandmark className="inline-block h-8 max-w-none fill-foreground" />
           </Link>
@@ -97,6 +98,7 @@ export default function RootLayout() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
           </div>
         </header>
 
