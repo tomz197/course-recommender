@@ -54,7 +54,7 @@ class MongoDBReader():
         Get user feedback about course recommendations.
         """
         try:
-            result = self.db.user_recommendation_feedback.find()
+            result = self.db.recommendation_feedback.find()
             return result
         except Exception as e:
             logging.error(f"Failed to get recommendation feedbacks: {str(e)}")
