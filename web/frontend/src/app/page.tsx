@@ -105,7 +105,7 @@ function HomeMobile() {
               />
               <CourseSearch
                 onSelectCourse={addLikedCourse}
-                placeholder="Search courses..."
+                placeholder="Search by name, code..." 
                 inputStyle="shadow-green-500/10 border-green-500/20"
                 excludeCourses={[
                   ...likedCourses.values(),
@@ -132,7 +132,7 @@ function HomeMobile() {
               />
               <CourseSearch
                 onSelectCourse={addDislikedCourse}
-                placeholder="Search courses..."
+                placeholder="Search by name, code..." 
                 inputStyle="shadow-destructive/10 border-destructive/20"
                 excludeCourses={[
                   ...likedCourses.values(),
