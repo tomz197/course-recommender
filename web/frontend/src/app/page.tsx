@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useCoursePreferences } from "@/components/course-provider";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
@@ -31,6 +31,33 @@ function HomeInner() {
   return (
     <main className="min-h-screen">
       {isMobile ? <HomeMobile /> : <HomeDesktop />}
+      {/* Visualization Advertisement Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.3 }}
+        className="container mx-auto px-4 py-8 flex flex-col items-center gap-6 mt-8 bg-muted/30 rounded-lg border shadow-sm"
+      >
+         <Link to="/visualization" className="flex flex-col md:flex-row items-center gap-4 w-full group hover:bg-muted/50 transition-colors rounded-lg p-2">
+            <img
+              src="/tsne_reduction_plot.png"
+              alt="Course Visualization Preview"
+              loading="lazy"
+              decoding="async"
+              width="400"
+              height="220"
+              className="w-full max-w-xs md:max-w-sm rounded-lg border shadow-md group-hover:scale-105 transition-transform"
+              style={{ background: '#fff' }}
+            />
+            <div className="flex-1 text-center md:text-left">
+              <h2 className="text-xl font-semibold mb-2">Explore All Courses Visually</h2>
+              <p className="text-muted-foreground mb-2 max-w-prose">
+                Discover the relationships between courses across all faculties with our interactive visualization. Each point represents a course, colored by faculty and sized by student enrollment. Click to explore!
+              </p>
+              <span className="inline-block mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium shadow hover:bg-primary/90 transition-colors">Go to Visualization</span>
+            </div>
+          </Link>
+      </motion.div>
     </main>
   );
 }
