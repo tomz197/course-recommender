@@ -61,7 +61,7 @@ function VisualizationPageInner() {
   const [showDescription, setShowDescription] = useState(true);
 
   return (
-    <div className="container mx-auto py-6 flex flex-col gap-4 px-4">
+    <div className="max-w-screen-lg mx-auto py-6 flex flex-col gap-4 px-4">
       <Alert variant="destructive" className='md:hidden'>
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Small screen detected</AlertTitle>
@@ -102,16 +102,6 @@ function VisualizationPageInner() {
 
       <CourseVisualization />
 
-      {/* Instructions */}
-      <div className="text-sm text-muted-foreground">
-        <p>• Use mouse wheel  to zoom in/out</p>
-        <p>• Click and drag or touch and drag to pan</p>
-        <p>• Double tap to reset zoom</p>
-        <p>• Click on points to see details</p>
-        <p>• Use the search box to filter courses</p>
-        <p>• Use the dropdown to filter by faculty</p>
-        <p>• Click on legend items to toggle faculty visibility</p>
-      </div>
     </div>
   );
 } 
@@ -248,7 +238,8 @@ function CourseVisualization() {
   }), []);
 
   return (
-    <div className={`flex flex-1 flex-col gap-4 ${isFullscreen ? 'absolute inset-0 z-50 bg-background p-4 left-0 top-0 right-0 bottom-0' : ''}`}>
+    <div className="flex flex-1 flex-col gap-4">
+    <div className={`flex flex-col gap-4 ${isFullscreen ? 'absolute inset-0 z-50 bg-background p-4 left-0 top-0 right-0 bottom-0' : ''}`}>
       {/* Filters */}
       <div className="flex gap-4 max-w-screen-lg mx-auto w-full">
         <Select onValueChange={(value) => setSelectedFaculty(value)}>
@@ -285,7 +276,7 @@ function CourseVisualization() {
       </div>
 
       {/* Visualization container */}
-      <div className={`relative border rounded-lg overflow-hidden p-2 flex flex-1 min-h-[600px] aspect-video mx-auto`}>
+      <div className={`relative border rounded-lg overflow-hidden p-2 flex w-full min-h-[600px] aspect-video mx-auto`}>
         <Plot
           data={traces as Data[]}
           layout={layout}
@@ -340,5 +331,17 @@ function CourseVisualization() {
         )}
       </div>
     </div>
+      {/* Instructions */}
+      <div className="text-sm text-muted-foreground">
+        <p>• Use mouse wheel  to zoom in/out</p>
+        <p>• Click and drag or touch and drag to pan</p>
+        <p>• Double tap to reset zoom</p>
+        <p>• Click on points to see details</p>
+        <p>• Use the search box to filter courses</p>
+        <p>• Use the dropdown to filter by faculty</p>
+        <p>• Click top right button to toggle fullscreen</p>
+        <p>• Click on legend items to toggle faculty visibility</p>
+      </div>
+      </div>
   )
 }
