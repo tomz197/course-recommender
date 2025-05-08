@@ -109,9 +109,12 @@ class MongoDBLogger():
 
         Args:
             text: Feedback text from the user
-            rating: Numerical rating (1-5)
             faculty: Faculty the feedback is related to
             user_id: Unique identifier of the user
+            phrases: List of phrases the feedback is related to
+            model: Model the feedback is related to
+            study_type: Study type the feedback is related to
+            semester: Semester the feedback is related to
         """
         try:
             feedback_doc = {
@@ -120,6 +123,8 @@ class MongoDBLogger():
                 "user_id": log.user_id,
                 "phrases": log.phrases,
                 "model": log.model,
+                "study_type": log.study_type,
+                "semester": log.semester,
                 "timestamp": datetime.now()
             }
 

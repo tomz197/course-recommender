@@ -68,6 +68,8 @@ class UserFeedbackLog():
     text: Optional[str] = None
     rating: Optional[int] = None
     faculty: Optional[str] = None
+    study_type: Optional[str] = None
+    semester: Optional[str] = None
     phrases: List[str] = None
     model: str = None
     user_id: str = ""

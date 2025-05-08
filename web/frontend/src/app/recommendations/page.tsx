@@ -56,7 +56,7 @@ function RecommendationsPageInner() {
       skipped: skippedCourses,
     }, recommendation, feedback);
 
-    if (storageController.getRecommendedCount() == 12) {
+    if (storageController.getRecommendedCount() == 8) {
       setIsFeedbackOpen(true);
     }
 
