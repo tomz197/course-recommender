@@ -104,8 +104,8 @@ function RecommendationsPageInner() {
         <CourseDialogModal
           courses={Array.from(dislikedCourses.values()).reverse()}
           onRemove={handleRemoveDislikedCourse}
-          title={`Disiked courses (${dislikedCourses.size})`}
-          triggerText={`Disiked (${dislikedCourses.size})`}
+          title={`Disliked courses (${dislikedCourses.size})`}
+          triggerText={`Disliked (${dislikedCourses.size})`}
         />
         <CourseDialogModal
           courses={Array.from(skippedCourses.values()).reverse()}
