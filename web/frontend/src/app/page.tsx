@@ -10,7 +10,7 @@ import { CourseSearch } from "@/components/course-search";
 import { SelectedCourses } from "@/components/selected-courses";
 import { Link, useNavigate } from "react-router";
 import { useCoursePreferences } from "@/components/course-provider";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { ThumbsUp, ThumbsDown, SquareArrowOutUpRight, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Suspense } from "react";
@@ -58,6 +58,87 @@ function HomeInner() {
             </div>
           </Link>
       </motion.div>
+
+      {/* About Us Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.4 }}
+        className="container mx-auto px-4 py-8 flex flex-col items-center gap-6 mt-8 bg-muted/30 rounded-lg border shadow-sm"
+      >
+        <div className="text-center max-w-2xl" id="about-us">
+          <h2 className="text-2xl font-bold mb-4">About This Project</h2>
+          <p className="text-muted-foreground mb-6">
+            This is a group project for the{" "}
+            <a 
+              href="https://is.muni.cz/predmet/fi/PV254" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline items-center gap-1 inline-flex"
+            >
+              Recommender Systems (PV254)
+              <SquareArrowOutUpRight className="w-4 h-4 inline-block self-center mt-0.5" />
+            </a>{" "}
+            course at Masaryk University. 
+            Our goal is to help students discover courses that match their interests and preferences 
+            using modern recommendation techniques.
+          </p>
+          
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-4">Team Members</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm max-w-prose mx-auto relative">
+              <div>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="w-full hover:bg-muted/50"
+                >
+                  <a href="https://zifcak.dev" target="_blank" rel="noopener noreferrer">
+                    Tomáš Žifčák
+                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+              <div>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="w-full hover:bg-muted/50"
+                >
+                  <a href="https://www.linkedin.com/in/peter-drazkovec/" target="_blank" rel="noopener noreferrer">
+                    Peter Dražkovec
+                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+              <div>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="w-full hover:bg-muted/50"
+                >
+                  <a href="https://www.linkedin.com/in/mareklicko/" target="_blank" rel="noopener noreferrer">
+                    Marek Ličko
+                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+              <div>
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="w-full hover:bg-muted/50"
+                >
+                  <a href="https://www.linkedin.com/in/martin-drazkovec/" target="_blank" rel="noopener noreferrer">
+                    Martin Dražkovec
+                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </main>
   );
 }
@@ -84,6 +165,13 @@ function HomeMobile() {
         <p className="text-sm text-muted-foreground">
           Select courses you like and dislike to get personalized recommendations
         </p>
+        <Link 
+          to="/about" 
+          className="text-sm text-primary hover:underline mt-2 inline-flex items-center"
+        >
+          Read more about us
+          <ArrowRight className="w-4 h-4 ml-1 mt-0.5" />
+        </Link>
       </motion.div>
 
       <div className="flex flex-col gap-8">

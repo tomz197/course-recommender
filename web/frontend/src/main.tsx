@@ -15,6 +15,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
 const Home = lazy(() => import("@/app/page"));
 const RecommendationsPage = lazy(() => import("@/app/recommendations/page"));
 const VisualizationPage = lazy(() => import("@/app/visualization/page"));
+const AboutPage = lazy(() => import("@/app/about/page"));
 
 const root = document.getElementById("root")!;
 
@@ -48,6 +49,14 @@ const router = createHashRouter(
           element: (
             <Suspense fallback={<LoadingSpinner />}>
               <VisualizationPage />
+            </Suspense>
+          ) 
+        },
+        { 
+          path: "about", 
+          element: (
+            <Suspense fallback={<LoadingSpinner />}>
+              <AboutPage />
             </Suspense>
           ) 
         },

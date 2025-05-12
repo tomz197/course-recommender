@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Link, Outlet, useNavigate, useLocation } from "react-router";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Github, Menu } from "lucide-react";
+import { Github, Menu, Moon, Sun } from "lucide-react";
 import Brandmark from "@/components/brandmark";
 import { getPredictionModels, setPredictionModel } from "@/lib/set-prediction-model";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -39,24 +39,26 @@ export default function RootLayout() {
             <Brandmark className="inline-block h-8 max-w-none fill-foreground" />
           </Link>
           <div className="hidden sm:flex gap-2 items-center">
-            <Button
-              onClick={() => {
-                navigate("/");
-              }}
-              variant="ghost"
-              className={location.pathname === "/" ? "underline" : ""}
-            >
-              Home
-            </Button>
-            <Button
-              onClick={() => {
-                navigate("/visualization");
-              }}
-              variant="ghost"
-              className={location.pathname === "/visualization" ? "underline" : ""}
-            >
-              Visualization
-            </Button>
+            <div className="flex rounded-md overflow-hidden divide-x">
+              <Link
+                to="/"
+                className={`px-4 py-2 hover:bg-accent hover:text-accent-foreground ${location.pathname === "/" ? "underline" : ""}`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/visualization"
+                className={`px-4 py-2 hover:bg-accent hover:text-accent-foreground ${location.pathname === "/visualization" ? "underline" : ""}`}
+              >
+                Visualization
+              </Link>
+              <Link
+                to="/about"
+                className={`px-4 py-2 hover:bg-accent hover:text-accent-foreground ${location.pathname === "/about" ? "underline" : ""}`}
+              >
+                About
+            </Link>
+            </div>
             <ResetButton
               onClick={() => {
                 storageController.resetStorage();
@@ -72,9 +74,9 @@ export default function RootLayout() {
           <div className="sm:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
+                <button className="p-1 rounded-md hover:bg-accent hover:text-accent-foreground">
+                  <Menu className="h-6 w-6" />
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => navigate("/")}>
@@ -83,22 +85,32 @@ export default function RootLayout() {
                 <DropdownMenuItem onClick={() => navigate("/visualization")}>
                   Visualization
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    storageController.resetStorage();
-                    navigate("/");
-                    void (async () => {
-                      await setPredictionModel(true);
-                      window.location.reload();
-                    })();
-                  }}
-                >
-                  Reset
+                <DropdownMenuItem onClick={() => navigate("/about")}>
+                  About
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <ResetButton
+                    onClick={() => {
+                      storageController.resetStorage();
+                      navigate("/");
+                      void (async () => {
+                        await setPredictionModel(true);
+                        window.location.reload();
+                      })();
+                    }}
+                  >
+                    <p className="w-full px-2 py-1 rounded-md hover:bg-accent hover:text-accent-foreground">Reset</p>
+                  </ResetButton>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <div className="flex items-center justify-between">
-                    <span>Theme:</span>
-                    <ModeToggle />
+                    <ModeToggle >
+                      <div className="flex items-center gap-2">
+                        <span>Theme:</span>
+                        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                      </div>
+                    </ModeToggle>
                   </div>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -164,13 +176,15 @@ function ModelSelector() {
 
 function ResetButton({
   onClick,
+  children,
 }: {
   onClick: () => void,
+  children?: React.ReactNode,
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Reset</Button>
+        {children ? children : <Button>Reset</Button>}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
