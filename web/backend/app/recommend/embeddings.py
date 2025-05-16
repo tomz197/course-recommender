@@ -309,6 +309,7 @@ def recommend_max(
     if course:
       # Optionally, attach the similarity score
       # course.SIMILARITY = float(best_match_liked[idx])
+      course.RECOMMENDED_FROM = [courseClient.get_course_by_id(liked_indices[np.argmax(similarity_liked[idx])]).CODE]
       recommendations.append(course)
 
   return recommendations
@@ -343,6 +344,16 @@ def recommend_mmr_cos(
   # 2) build initial candidate list, sorted by descending sim_to_target
   excluded = set(liked_codes + disliked_codes + skipped_codes)
   excluded_idxs = courseClient.get_course_ids_by_codes(excluded)
+
+  # Filter out courses that are too similar to liked courses
+  # Calculate similarity to individual liked courses
+  liked_embeds_single = all_embeds[liked_indices]
+  liked_embeds_single_norm = liked_embeds_single / np.linalg.norm(liked_embeds_single, axis=1, keepdims=True)
+  similarity_to_single = np.dot(all_embeds_norm, liked_embeds_single_norm.T)
+  max_similarity_to_single = np.max(similarity_to_single, axis=1)
+  sim_to_target[max_similarity_to_single > 0.8] = -np.inf
+
+  print(f"[average] Filtered out {np.sum(max_similarity_to_single > 0.8)} courses that are too similar to liked ones")
 
   candidate_idxs = [
     i for i in np.argsort(-sim_to_target)
@@ -454,7 +465,7 @@ def recommend_max_with_combinations(
   best_match_liked = np.max(similarity_liked, axis=1)
 
   # Filter out courses that are too similar to liked ones
-  to_filter_idx = np.where(best_match_liked > 0.95)[0]
+  to_filter_idx = np.where(best_match_liked > 0.94)[0]
   best_match_target_score[to_filter_idx] = -np.inf
   num_filtered_out_liked = len(to_filter_idx)
   print(f"Filtered out {num_filtered_out_liked} courses that are too similar to liked ones")
