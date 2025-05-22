@@ -21,6 +21,7 @@ import { CourseIsLink } from "@/components/course-is-link";
 import { CourseDialogModal } from "@/components/course-list-modal";
 import { motion, AnimatePresence } from "framer-motion";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import BuyMeCoffee from "@/components/buy-me-coffee";
 
 export default function RecommendationsPage() {
   return (
@@ -158,6 +159,10 @@ function RecommendationsPageInner() {
           Give Feedback
           <MessageSquare className="h-4 w-4" />
         </Button>
+      </div>
+
+      <div className="flex justify-center my-8">
+        <BuyMeCoffee size="default" />
       </div>
 
     </main>

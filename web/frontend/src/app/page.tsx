@@ -15,6 +15,8 @@ import { motion } from "framer-motion";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/loading-spinner";
+import BuyMeCoffee from "@/components/buy-me-coffee";
+import { AnimatedSection } from "@/components/animated-section";
 
 
 export default function Home() {
@@ -31,41 +33,32 @@ function HomeInner() {
   return (
     <main className="min-h-screen max-w-screen-lg mx-auto w-full py-4 pb-24 relative">
       {isMobile ? <HomeMobile /> : <HomeDesktop />}
+      
       {/* Visualization Advertisement Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.3 }}
-        className="container mx-auto px-4 py-8 flex flex-col items-center gap-6 mt-8 bg-muted/30 rounded-lg border shadow-sm"
-      >
-         <Link to="/visualization" className="flex flex-col md:flex-row items-center gap-4 w-full group hover:bg-muted/50 transition-colors rounded-lg p-2">
-            <img
-              src="/tsne_reduction_plot.png"
-              alt="Course Visualization Preview"
-              loading="lazy"
-              decoding="async"
-              width="400"
-              height="220"
-              className="w-full max-w-xs md:max-w-sm rounded-lg border shadow-md group-hover:scale-105 transition-transform"
-              style={{ background: '#fff' }}
-            />
-            <div className="flex-1 text-center md:text-left">
-              <h2 className="text-xl font-semibold mb-2">Explore All Courses Visually</h2>
-              <p className="text-muted-foreground mb-2 max-w-prose">
-                Discover the relationships between courses across all faculties with our interactive visualization. Each point represents a course, colored by faculty and sized by student enrollment. Click to explore!
-              </p>
-              <span className="inline-block mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium shadow hover:bg-primary/90 transition-colors">Go to Visualization</span>
-            </div>
-          </Link>
-      </motion.div>
+      <AnimatedSection delay={0.3}>
+        <Link to="/visualization" className="flex flex-col md:flex-row items-center gap-4 w-full group hover:bg-muted/50 transition-colors rounded-lg p-2">
+          <img
+            src="/tsne_reduction_plot.png"
+            alt="Course Visualization Preview"
+            loading="lazy"
+            decoding="async"
+            width="400"
+            height="220"
+            className="w-full max-w-xs md:max-w-sm rounded-lg border shadow-md group-hover:scale-105 transition-transform"
+            style={{ background: '#fff' }}
+          />
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-xl font-semibold mb-2">Explore All Courses Visually</h2>
+            <p className="text-muted-foreground mb-2 max-w-prose">
+              Discover the relationships between courses across all faculties with our interactive visualization. Each point represents a course, colored by faculty and sized by student enrollment. Click to explore!
+            </p>
+            <span className="inline-block mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium shadow hover:bg-primary/90 transition-colors">Go to Visualization</span>
+          </div>
+        </Link>
+      </AnimatedSection>
 
       {/* About Us Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.4 }}
-        className="container mx-auto px-4 py-8 flex flex-col items-center gap-6 mt-8 bg-muted/30 rounded-lg border shadow-sm"
-      >
+      <AnimatedSection delay={0.4}>
         <div className="text-center max-w-2xl" id="about-us">
           <h2 className="text-2xl font-bold mb-4">About This Project</h2>
           <p className="text-muted-foreground mb-6">
@@ -87,58 +80,53 @@ function HomeInner() {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-4">Team Members</h3>
             <div className="grid grid-cols-2 gap-4 text-sm max-w-prose mx-auto relative">
-              <div>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full hover:bg-muted/50"
-                >
-                  <a href="https://zifcak.dev" target="_blank" rel="noopener noreferrer">
-                    Tomáš Žifčák
-                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
-                  </a>
-                </Button>
-              </div>
-              <div>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full hover:bg-muted/50"
-                >
-                  <a href="https://www.linkedin.com/in/peter-drazkovec/" target="_blank" rel="noopener noreferrer">
-                    Peter Dražkovec
-                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
-                  </a>
-                </Button>
-              </div>
-              <div>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full hover:bg-muted/50"
-                >
-                  <a href="https://www.linkedin.com/in/mareklicko/" target="_blank" rel="noopener noreferrer">
-                    Marek Ličko
-                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
-                  </a>
-                </Button>
-              </div>
-              <div>
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="w-full hover:bg-muted/50"
-                >
-                  <a href="https://www.linkedin.com/in/martin-drazkovec/" target="_blank" rel="noopener noreferrer">
-                    Martin Dražkovec
-                    <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
-                  </a>
-                </Button>
-              </div>
+              {[
+                {
+                  name: "Tomáš Žifčák",
+                  url: "https://zifcak.dev"
+                },
+                {
+                  name: "Peter Dražkovec",
+                  url: "https://www.linkedin.com/in/peter-drazkovec/"
+                },
+                {
+                  name: "Marek Ličko",
+                  url: "https://www.linkedin.com/in/mareklicko/"
+                },
+                {
+                  name: "Martin Dražkovec",
+                  url: "https://www.linkedin.com/in/martin-drazkovec/"
+                }
+              ].map((member) => (
+                <div key={member.url}>
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="w-full hover:bg-muted/50"
+                  >
+                    <a href={member.url} target="_blank" rel="noopener noreferrer">
+                      {member.name}
+                      <SquareArrowOutUpRight className="w-4 h-4 ml-1" />
+                    </a>
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
-      </motion.div>
+      </AnimatedSection>
+
+      {/* Support Section */}
+      <AnimatedSection delay={0.5}>
+        <div className="text-center max-w-2xl">
+          <h2 className="text-2xl font-bold mb-4">Support Ongoing Maintenance</h2>
+          <p className="text-muted-foreground mb-6">
+            If you find this tool helpful and would like to support its ongoing maintenance and development,
+            consider buying us a coffee! Your support helps keep this project running and improving.
+          </p>
+          <BuyMeCoffee />
+        </div>
+      </AnimatedSection>
     </main>
   );
 }
